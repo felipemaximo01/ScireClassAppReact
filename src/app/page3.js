@@ -2,13 +2,14 @@ import { useCallback } from 'react';
 import { StyleSheet, Text, View, Image,TouchableOpacity } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import {Link} from 'expo-router'
 
 SplashScreen.preventAutoHideAsync();
 
-export function Page3({navigation}) {
+export default function Page3() {
   const[fontsLoaded,fontError] = useFonts({
-    'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
-    'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
+    'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
   });
 
   const onLayoutRootView = useCallback(async () => {
@@ -24,7 +25,7 @@ export function Page3({navigation}) {
   return (
     <View onLayout={onLayoutRootView} style={styles.container}>
       <Image
-        source={require("../../assets/illustrationPage3.png")}
+        source={require("../assets/illustrationPage3.png")}
         style={styles.page}
       />
       <Text style={styles.titlePage}>Crie seu próprio plano de estudo</Text>
@@ -33,9 +34,11 @@ export function Page3({navigation}) {
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Cadastre-se</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonEntrar}>
-          <Text style={styles.buttonTextEntrar}>Entrar</Text>
-        </TouchableOpacity>
+        <Link href={"/login"} asChild>
+          <TouchableOpacity style={styles.buttonEntrar}>
+            <Text style={styles.buttonTextEntrar}>Entrar</Text>
+          </TouchableOpacity>
+        </Link>
       </View>
     </View>
   );
@@ -50,7 +53,7 @@ const styles = StyleSheet.create({
     padding:5
   },
   page:{
-    marginTop: 60,
+    marginTop: 40,
     marginBottom: 60
   },
   titlePage:{
@@ -98,7 +101,7 @@ const styles = StyleSheet.create({
     width:"90%",
     marginTop:8,
     alignItems:"center",
-    justifyContent:"space-between"
+    justifyContent:"space-between",
 },
 
 });

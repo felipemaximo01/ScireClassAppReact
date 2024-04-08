@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme": "scireclass",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -30,9 +31,13 @@
       [
         "expo-font",
         {
-          "fonts":["./assets/fonts/Poppins-Regular.ttf","./assets/fonts/Poppins-Bold.ttf"]
+          "fonts": [
+            "./assets/fonts/Poppins-Regular.ttf",
+            "./assets/fonts/Poppins-Bold.ttf"
+          ]
         }
-      ]
+      ],
+      "expo-router"
     ]
   }
 }
