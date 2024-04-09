@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { StyleSheet, Text, View, Image,TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View,TouchableOpacity, TextInput } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link} from 'expo-router'
@@ -24,7 +24,7 @@ export default function Login(){
       }
 
     return(
-        <View style={styles.container}>
+        <View onLayout={onLayoutRootView} style={styles.container}>
             <View style={styles.title}>
                 <Text style={styles.titleText}>Log in</Text>
             </View>

@@ -1,9 +1,33 @@
-import { useCallback } from 'react';
+import { useCallback,useState } from 'react';
 import { StyleSheet, Text, View, Image,TouchableOpacity } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link} from 'expo-router'
-import {useSafeAreaInsets }  from "react-native-safe-area-context"
+import AppIntroSlider from 'react-native-app-intro-slider';
+
+const slides = [
+  {
+    key:'1',
+    title: 'Uma Grande variedade de cursos',
+    text: 'Diversos cursos para você encontre seu caminho para aprender',
+    image: require("../assets/illustrationPage1.png"),
+    mostraBotao:false
+  },
+  {
+    key:'2',
+    title: 'Rápido e fácil aprendizado',
+    text: 'Aprendizagem fácil e rápida a qualquer momento para ajudá-le melhorar várias habilidades',
+    image: require("../assets/illustrationPage2.png"),
+    mostraBotao:false
+  },
+  {
+    key:'3',
+    title: 'Crie seu próprio plano de estudo',
+    text: 'Estude de acordo com o plano de estudo, para fazer o seu estudo mais motivado',
+    image: require("../assets/illustrationPage3.png"),
+    mostraBotao:true
+  }
+]
 
 SplashScreen.preventAutoHideAsync();
 
@@ -23,22 +47,48 @@ export default function Page1() {
     return null;
   }
 
+  const [showHome,setShowHome] = useState(false);
 
-  return (
-    <View onLayout={onLayoutRootView} style={styles.container}>
+  function renderSlides({item}){
+    return(
+      <View onLayout={onLayoutRootView} style={styles.container}>
       <Image
-        source={require("../assets/illustrationPage1.png")}
+        source={item.image}
         style={styles.page}
       />
-      <Text style={styles.titlePage}>Uma Grande variedade de cursos</Text>
-      <Text style={styles.textPage}>Diversos cursos para você encontre seu caminho para aprender</Text>
-      <Link href={"/page2"} asChild >
+      <Text style={styles.titlePage}>{item.title}</Text>
+      <Text style={styles.textPage}>{item.text}</Text>
+      {item.mostraBotao ? <View  style={styles.buttonArea}>
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Próximo</Text>
+          <Text style={styles.buttonText}>Cadastre-se</Text>
         </TouchableOpacity>
-      </Link>
+        <Link href={"/login"} asChild>
+          <TouchableOpacity style={styles.buttonEntrar}>
+            <Text style={styles.buttonTextEntrar}>Entrar</Text>
+          </TouchableOpacity>
+        </Link>
+      </View> : ""}
     </View>
-  );
+    )
+  }
+
+  if(showHome){
+    return(<Text>HOME</Text>)
+  }else{
+    return (
+        <AppIntroSlider
+          renderItem={renderSlides}
+          data={slides}
+          activeDotStyle={{
+            backgroundColor:"#3D5CFF",
+            width:30
+          }}
+          renderNextButton={() => {}}
+          renderDoneButton={() => {}}
+        />
+    );
+  }
+  
 }
 
 const styles = StyleSheet.create({
@@ -64,18 +114,41 @@ const styles = StyleSheet.create({
     fontFamily:'Poppins-Regular'
   },
   button:{
-    margin:60,
-    width:"80%",
+    marginTop:30,
+    width:"45%",
     height:50,
     alignItems:'center',
     justifyContent:'center',
     backgroundColor:'#3D5CFF',
     borderRadius: 8
   },
+  buttonEntrar:{
+    marginTop:30,
+    width:"45%",
+    height:50,
+    alignItems:'center',
+    justifyContent:'center',
+    backgroundColor:'#FFF',
+    borderRadius: 8,
+    borderColor:"#3D5CFF",
+    borderWidth:2
+  },
   buttonText:{
     fontFamily:'Poppins-Regular',
     fontSize:20,
     color:'#fff'
-  }
+  },
+  buttonTextEntrar:{
+    fontFamily:'Poppins-Regular',
+    fontSize:20,
+    color:'#3D5CFF'
+  },
+  buttonArea:{
+    flexDirection:"row",
+    width:"90%",
+    marginTop:2,
+    alignItems:"center",
+    justifyContent:"space-between",
+},
 
 });
