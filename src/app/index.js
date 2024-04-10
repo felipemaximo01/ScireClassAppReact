@@ -32,6 +32,7 @@ const slides = [
 SplashScreen.preventAutoHideAsync();
 
 export default function Page1() {
+  const [showHome,setShowHome] = useState(false);
   const[fontsLoaded,fontError] = useFonts({
     'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
@@ -47,7 +48,7 @@ export default function Page1() {
     return null;
   }
 
-  const [showHome,setShowHome] = useState(false);
+  
 
   function renderSlides({item}){
     return(
