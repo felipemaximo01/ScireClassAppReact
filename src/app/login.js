@@ -3,6 +3,7 @@ import { StyleSheet, Text, View,TouchableOpacity, TextInput } from 'react-native
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link} from 'expo-router'
+import useStorage from "./hooks/useStorage"
 
 SplashScreen.preventAutoHideAsync();
 
@@ -10,6 +11,7 @@ export default function Login(){
 
     const [email,setEmail] = useState("")
     const [senha,setSenha] = useState("")
+    const {saveItem} = useStorage();
 
     const[fontsLoaded,fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -26,11 +28,15 @@ export default function Login(){
         return null;
       }
 
-      const handleLoginUsuario = () =>{
-        console.log(email,senha)
-        fetch(`http://localhost:8080/scireclass/usuario/login/${email}/${senha}`)
-        .then((response) => {
-            console.log(response)
+      const handleLoginUsuario = async () =>{
+        fetch(`http://192.168.100.16:8080/scireclass/usuario/login/${email}/${senha}`)
+        .then((response) => response.json())
+        .then(async (responseJson) => {
+          if(responseJson.message !== undefined){
+            alert(responseJson.message)
+          }else{
+            await saveItem("@token",responseJson.token)
+          }
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -46,10 +52,10 @@ export default function Login(){
                 <Text style={styles.formText}>Seu Email</Text>
                 <TextInput style={styles.formInput} onChangeText={(value) => setEmail(value)}/>
                 <Text style={styles.formText}>Senha</Text>
-                <TextInput style={styles.formInput} onChangeText={(value) => setSenha(value)}/>
+                <TextInput secureTextEntry={true} style={styles.formInput} onChangeText={(value) => setSenha(value)}/>
                 <Link href={""} style={styles.esqueceuASenha}>Esqueceu a senha ?</Link>
                 <TouchableOpacity onPress={handleLoginUsuario} style={styles.formButton}><Text style={styles.buttonText}>Log in</Text></TouchableOpacity>
-                <Text style={styles.cadastreText}>Não tem uma conta? <Link href={""} style={styles.linkCadastra}>Sign up</Link></Text>
+                <Text style={styles.cadastreText}>Não tem uma conta? <Link href={"/cadastroUsuario"} style={styles.linkCadastra}>Sign up</Link></Text>
             </View>
         </View>
         

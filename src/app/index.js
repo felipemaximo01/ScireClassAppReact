@@ -1,9 +1,10 @@
-import { useCallback,useState } from 'react';
+import { useCallback,useEffect,useState } from 'react';
 import { StyleSheet, Text, View, Image,TouchableOpacity } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {Link} from 'expo-router'
+import {Link,Redirect } from 'expo-router'
 import AppIntroSlider from 'react-native-app-intro-slider';
+import useStorage from './hooks/useStorage';
 
 const slides = [
   {
@@ -33,6 +34,20 @@ SplashScreen.preventAutoHideAsync();
 
 export default function Page1() {
   const [showHome,setShowHome] = useState(false);
+  const {getItem} = useStorage();
+
+  useEffect(() =>{
+    async function jaLogado(){
+      const token = await getItem("@token")
+      if(token !== null && token !== undefined && token !== ""){
+        setShowHome(true)
+      }else{
+        setShowHome(false)
+      }
+    };
+    jaLogado();
+  },[])
+
   const[fontsLoaded,fontError] = useFonts({
     'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
@@ -48,6 +63,8 @@ export default function Page1() {
     return null;
   }
 
+
+
   
 
   function renderSlides({item}){
@@ -60,9 +77,11 @@ export default function Page1() {
       <Text style={styles.titlePage}>{item.title}</Text>
       <Text style={styles.textPage}>{item.text}</Text>
       {item.mostraBotao ? <View  style={styles.buttonArea}>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Cadastre-se</Text>
-        </TouchableOpacity>
+        <Link href={"/cadastroUsuario"} asChild>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Cadastre-se</Text>
+          </TouchableOpacity>
+        </Link>
         <Link href={"/login"} asChild>
           <TouchableOpacity style={styles.buttonEntrar}>
             <Text style={styles.buttonTextEntrar}>Entrar</Text>
@@ -74,7 +93,7 @@ export default function Page1() {
   }
 
   if(showHome){
-    return(<Text>HOME</Text>)
+    return <Redirect href="/userScire/home" />;;
   }else{
     return (
         <AppIntroSlider
