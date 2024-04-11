@@ -55,7 +55,7 @@ export default function Login(){
                 <TextInput secureTextEntry={true} style={styles.formInput} onChangeText={(value) => setSenha(value)}/>
                 <Link href={""} style={styles.esqueceuASenha}>Esqueceu a senha ?</Link>
                 <TouchableOpacity onPress={handleLoginUsuario} style={styles.formButton}><Text style={styles.buttonText}>Log in</Text></TouchableOpacity>
-                <Text style={styles.cadastreText}>Não tem uma conta? <Link href={"/cadastroUsuario"} style={styles.linkCadastra}>Sign up</Link></Text>
+                <Text style={styles.cadastroText}>Não tem uma conta? <Link href={"/cadastroUsuario"} style={styles.linkCadastra}>Sign up</Link></Text>
             </View>
         </View>
         
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
         fontFamily:"Poppins-Regular",
         color:"#858597"
       },
-      cadastreText:{
+      cadastroText:{
         fontFamily:"Poppins-Regular",
         color:"#858597",
         alignItems:"center",
