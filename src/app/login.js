@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View,TouchableOpacity, TextInput } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {Link} from 'expo-router'
+import {Link,Redirect} from 'expo-router'
 import useStorage from "./hooks/useStorage"
 
 SplashScreen.preventAutoHideAsync();
@@ -36,6 +36,7 @@ export default function Login(){
             alert(responseJson.message)
           }else{
             await saveItem("@token",responseJson.token)
+            return <Redirect href="/userScire/home" />;
           }
         })
         .catch((error) => {

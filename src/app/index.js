@@ -93,7 +93,7 @@ export default function Page1() {
   }
 
   if(showHome){
-    return <Redirect href="/userScire/home" />;;
+    return <Redirect href="/userScire/home" />;
   }else{
     return (
         <AppIntroSlider

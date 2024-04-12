@@ -3,14 +3,20 @@ import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView } from '
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {Link} from 'expo-router'
+import {Link, Redirect} from 'expo-router'
 import Checkbox from 'expo-checkbox';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function CadastraUsuario(){
 
-    const [current, setCurrent] = useState();
+    const [perfil, setPerfil] = useState("");
+    const [nome, setNome] = useState("");
+    const [senha, setSenha] = useState("");
+    const [email, setEmail] = useState("");
+    const [aceitouTermos, setAceitouTermos] = useState(false);
+    const [cep,setCep] = useState("")
+    const [numero,setNumero] = useState("")
 
     const[fontsLoaded,fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -27,6 +33,48 @@ export default function CadastraUsuario(){
         return null;
     }
 
+    const handleCadastraUsuario = async () =>{
+      
+      const usuarioDTO = {
+        nome: nome,
+        senha:senha,
+        email:email,
+        aceitouTermos: aceitouTermos,
+        perfil:perfil,
+        ativo: false
+      }
+      const enderecoDTO = {
+        cep: cep,
+        numero: numero
+      }
+
+      const json = {
+        usuarioDTO: usuarioDTO,
+        enderecoDTO: enderecoDTO
+      }
+
+      fetch(`http://192.168.100.16:8080/scireclass/usuario/save`,{
+        method:"post",
+        body: JSON.stringify(json),
+        headers:{
+          "Content-type": "application/json",
+          Accept: "application/json"
+        }
+      })
+      .then((response) => response.json())
+      .then(async (responseJson) => {
+        if(responseJson.message !== undefined){
+          alert(responseJson.message)
+        }else{
+          alert("Cadastro Realizado Com Sucesso, para ativar sua conta verifique a sua caixa de emails.")
+          return (<Redirect href="/login" />)
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+    }
+
     return(
         <ScrollView>
             <View onLayout={onLayoutRootView} style={styles.container}>
@@ -37,28 +85,28 @@ export default function CadastraUsuario(){
                 <View style={styles.form}>
                     <Text style={styles.formText}>Tipo Usuário</Text>
                     <RadioButtonGroup containerStyle={styles.radioGroup}
-                        selected={current}
-                        onSelected={(value) => setCurrent(value)}
+                        selected={perfil}
+                        onSelected={(value) => setPerfil(value)}
                         radioBackground="#3D5CFF">
                         <RadioButtonItem value="PROFESSOR" label={<Text style={styles.formText}>Professor</Text>}/>
                         <RadioButtonItem value="ALUNO" label={<Text style={styles.formText}>Aluno</Text>}/>
                     </RadioButtonGroup>
                     <Text style={styles.formText}>Nome</Text>
-                    <TextInput style={styles.formInput}/>
+                    <TextInput onChangeText={(value) => setNome(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>Senha</Text>
-                    <TextInput style={styles.formInput}/>
+                    <TextInput secureTextEntry={true} onChangeText={(value) => setSenha(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>Seu Email</Text>
-                    <TextInput  style={styles.formInput}/>
+                    <TextInput onChangeText={(value) => setEmail(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>CEP</Text>
-                    <TextInput style={styles.formInput}/>
+                    <TextInput onChangeText={(value) => setCep(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>N° residencial</Text>
-                    <TextInput style={styles.formInput}/>
+                    <TextInput onChangeText={(value) => setNumero(value)} style={styles.formInput}/>
                     <View style={{flexDirection:'row'}}>
-                        <Checkbox style={styles.checkBox}/> 
+                        <Checkbox value={aceitouTermos} onValueChange={setAceitouTermos} style={styles.checkBox}/> 
                         <Text style={styles.formText}>Ao criar uma conta você tem que concordar com nossos termos e condição.</Text>
                     </View>
                     <Text style={styles.loginText}>Já tem uma conta? <Link href={"/login"} style={styles.linklogin}>Log in</Link></Text>
-                    <TouchableOpacity style={styles.formButton}><Text style={styles.buttonText}>Criar Conta</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={handleCadastraUsuario} style={styles.formButton}><Text style={styles.buttonText}>Criar Conta</Text></TouchableOpacity>
                 </View>
             </View>
         </ScrollView>
