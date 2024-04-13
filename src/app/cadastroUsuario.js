@@ -5,12 +5,15 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link, Redirect,useRouter} from 'expo-router'
 import Checkbox from 'expo-checkbox';
+import useLocalhost from "./hooks/useLocalhost"
 
 SplashScreen.preventAutoHideAsync();
 
 export default function CadastraUsuario(){
 
     const router = useRouter();
+
+    const {localhost} = useLocalhost();
 
     const [perfil, setPerfil] = useState("ALUNO");
     const [nome, setNome] = useState("");
@@ -74,7 +77,7 @@ export default function CadastraUsuario(){
         enderecoDTO: enderecoDTO
       }
 
-      fetch(`http://192.168.100.16:8080/scireclass/usuario/save`,{
+      fetch(`http://${localhost}:8080/scireclass/usuario/save`,{
         method:"post",
         body: JSON.stringify(json),
         headers:{

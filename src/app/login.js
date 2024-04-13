@@ -4,12 +4,15 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link,Redirect,useRouter} from 'expo-router'
 import useStorage from "./hooks/useStorage"
+import useLocalhost from "./hooks/useLocalhost"
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Login(){
 
     const router = useRouter();
+
+    const {localhost} = useLocalhost();
 
     const [email,setEmail] = useState("")
     const [senha,setSenha] = useState("")
@@ -37,7 +40,7 @@ export default function Login(){
           return
         }
 
-        fetch(`http://192.168.100.16:8080/scireclass/usuario/login/${email}/${senha}`)
+        fetch(`http://${localhost}:8080/scireclass/usuario/login/${email}/${senha}`)
         .then((response) => response.json())
         .then(async (responseJson) => {
           if(responseJson.message !== undefined){
