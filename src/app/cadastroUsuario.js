@@ -13,7 +13,8 @@ export default function CadastraUsuario(){
 
     const router = useRouter();
 
-    const {localhost} = useLocalhost();
+    const {getLocalhost} = useLocalhost();
+    const [localhost,setLocahost]  = useState("");
 
     const [perfil, setPerfil] = useState("ALUNO");
     const [nome, setNome] = useState("");
@@ -43,10 +44,26 @@ export default function CadastraUsuario(){
         return null;
     }
 
+    useEffect(() =>{
+      async function loadLocalhost(){
+        const host = await getLocalhost();
+        setLocahost(host);
+      }
+      loadLocalhost()
+    },[])
+
     const handleCadastraUsuario = async () =>{
+
+      const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
 
       if(!nome.trim() || !senha.trim() || !email.trim() || !cep.trim() || !numero.trim()){
         alert("Todos os campos precisam ser preenchidos!")
+        return
+      }
+
+      if(reg.test(email) === false){
+        alert("Insira um email válido!")
+        setEmail("")
         return
       }
 
@@ -140,12 +157,12 @@ export default function CadastraUsuario(){
                     <TextInput onChangeText={(value) => setNome(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>Senha</Text>
                     <TextInput secureTextEntry={true} onChangeText={(value) => setSenha(value)} style={styles.formInput}/>
-                    <Text style={styles.formText}>Seu Email</Text>
-                    <TextInput onChangeText={(value) => setEmail(value)} style={styles.formInput}/>
+                    <Text value={email} style={styles.formText}>Seu Email</Text>
+                    <TextInput keyboardType='email-address' onChangeText={(value) => setEmail(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>CEP</Text>
-                    <TextInput value={cep} onBlur={checkCEP} onChangeText={(value) => setCep(value)} style={styles.formInput}/>
+                    <TextInput keyboardType='phone-pad' value={cep} onBlur={checkCEP} onChangeText={(value) => setCep(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>N° residencial</Text>
-                    <TextInput onChangeText={(value) => setNumero(value)} style={styles.formInput}/>
+                    <TextInput keyboardType='phone-pad' onChangeText={(value) => setNumero(value)} style={styles.formInput}/>
                     <View style={{flexDirection:'row'}}>
                         <Checkbox value={aceitouTermos} onValueChange={setAceitouTermos} style={styles.checkBox}/> 
                         <Text style={styles.formText}>Ao criar uma conta você tem que concordar com nossos termos e condição.</Text>

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View,TouchableOpacity, TextInput } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,7 +12,8 @@ export default function Login(){
 
     const router = useRouter();
 
-    const {localhost} = useLocalhost();
+    const {getLocalhost} = useLocalhost();
+    const [localhost,setLocahost]  = useState("");
 
     const [email,setEmail] = useState("")
     const [senha,setSenha] = useState("")
@@ -33,10 +34,26 @@ export default function Login(){
         return null;
       }
 
+      useEffect(() =>{
+        async function loadLocalhost(){
+          const host = await getLocalhost();
+          setLocahost(host);
+        }
+        loadLocalhost()
+      },[])
+
       const handleLoginUsuario = async () =>{
+
+        const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
 
         if(!senha.trim() || !email.trim()){
           alert("Todos os campos precisam ser preenchidos!")
+          return
+        }
+
+        if(reg.test(email) === false){
+          alert("Insira um email válido")
+          setEmail("")
           return
         }
 
@@ -62,10 +79,10 @@ export default function Login(){
             </View>
             <View style={styles.form}>
                 <Text style={styles.formText}>Seu Email</Text>
-                <TextInput style={styles.formInput} onChangeText={(value) => setEmail(value)}/>
+                <TextInput value={email} keyboardType='email-address' style={styles.formInput} onChangeText={(value) => setEmail(value)}/>
                 <Text style={styles.formText}>Senha</Text>
                 <TextInput secureTextEntry={true} style={styles.formInput} onChangeText={(value) => setSenha(value)}/>
-                <Link href={""} style={styles.esqueceuASenha}>Esqueceu a senha ?</Link>
+                <Link href={"/esqueceuASenha"} style={styles.esqueceuASenha}>Esqueceu a senha ?</Link>
                 <TouchableOpacity onPress={handleLoginUsuario} style={styles.formButton}><Text style={styles.buttonText}>Log in</Text></TouchableOpacity>
                 <Text style={styles.cadastroText}>Não tem uma conta? <Link href={"/cadastroUsuario"} style={styles.linkCadastra}>Sign up</Link></Text>
             </View>
