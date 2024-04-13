@@ -3,20 +3,27 @@ import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView } from '
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {Link, Redirect} from 'expo-router'
+import {Link, Redirect,useRouter} from 'expo-router'
 import Checkbox from 'expo-checkbox';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function CadastraUsuario(){
 
-    const [perfil, setPerfil] = useState("");
+    const router = useRouter();
+
+    const [perfil, setPerfil] = useState("ALUNO");
     const [nome, setNome] = useState("");
     const [senha, setSenha] = useState("");
     const [email, setEmail] = useState("");
     const [aceitouTermos, setAceitouTermos] = useState(false);
     const [cep,setCep] = useState("")
     const [numero,setNumero] = useState("")
+    const [logradouro, setLogradouro] = useState("")
+    const [bairro, setBairro] = useState("")
+    const [localidade, setLocalidade] = useState("")
+    const [uf, setUf] = useState("")
+
 
     const[fontsLoaded,fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -34,6 +41,16 @@ export default function CadastraUsuario(){
     }
 
     const handleCadastraUsuario = async () =>{
+
+      if(!nome.trim() || !senha.trim() || !email.trim() || !cep.trim() || !numero.trim()){
+        alert("Todos os campos precisam ser preenchidos!")
+        return
+      }
+
+      if(!aceitouTermos){
+        alert("Para criar uma conta é necessário aceitar os termos e condiçõesdefaultValue!")
+        return
+      }
       
       const usuarioDTO = {
         nome: nome,
@@ -45,7 +62,11 @@ export default function CadastraUsuario(){
       }
       const enderecoDTO = {
         cep: cep,
-        numero: numero
+        numero: numero,
+        logradouro: logradouro,
+        bairro: bairro,
+        localidade: localidade,
+        uf: uf
       }
 
       const json = {
@@ -67,12 +88,33 @@ export default function CadastraUsuario(){
           alert(responseJson.message)
         }else{
           alert("Cadastro Realizado Com Sucesso, para ativar sua conta verifique a sua caixa de emails.")
-          return (<Redirect href="/login" />)
+          router.replace("/login")
         }
       })
       .catch((error) => {
         console.error('Error:', error);
       });
+    }
+
+    const checkCEP = (e) =>{
+      if(cep.length === 8) {
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+          .then(res => res.json())
+          .then(data => {
+            if (!data.erro) {
+              setLogradouro(data.logradouro);
+              setBairro(data.bairro);
+              setLocalidade(data.localidade);
+              setUf(data.uf);
+            } else {
+                alert("CEP inválido. Por favor, verifique o CEP inserido.");
+                setCep("")
+            }
+          })
+      } else {
+        alert("CEP inválido. Por favor, verifique o CEP inserido.");
+        setCep("")
+      }
     }
 
     return(
@@ -84,7 +126,7 @@ export default function CadastraUsuario(){
                 </View>
                 <View style={styles.form}>
                     <Text style={styles.formText}>Tipo Usuário</Text>
-                    <RadioButtonGroup containerStyle={styles.radioGroup}
+                    <RadioButtonGroup  containerStyle={styles.radioGroup}
                         selected={perfil}
                         onSelected={(value) => setPerfil(value)}
                         radioBackground="#3D5CFF">
@@ -98,7 +140,7 @@ export default function CadastraUsuario(){
                     <Text style={styles.formText}>Seu Email</Text>
                     <TextInput onChangeText={(value) => setEmail(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>CEP</Text>
-                    <TextInput onChangeText={(value) => setCep(value)} style={styles.formInput}/>
+                    <TextInput value={cep} onBlur={checkCEP} onChangeText={(value) => setCep(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>N° residencial</Text>
                     <TextInput onChangeText={(value) => setNumero(value)} style={styles.formInput}/>
                     <View style={{flexDirection:'row'}}>

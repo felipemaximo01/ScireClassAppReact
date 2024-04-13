@@ -2,12 +2,14 @@ import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View,TouchableOpacity, TextInput } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {Link,Redirect} from 'expo-router'
+import {Link,Redirect,useRouter} from 'expo-router'
 import useStorage from "./hooks/useStorage"
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Login(){
+
+    const router = useRouter();
 
     const [email,setEmail] = useState("")
     const [senha,setSenha] = useState("")
@@ -29,6 +31,12 @@ export default function Login(){
       }
 
       const handleLoginUsuario = async () =>{
+
+        if(!senha.trim() || !email.trim()){
+          alert("Todos os campos precisam ser preenchidos!")
+          return
+        }
+
         fetch(`http://192.168.100.16:8080/scireclass/usuario/login/${email}/${senha}`)
         .then((response) => response.json())
         .then(async (responseJson) => {
@@ -36,7 +44,7 @@ export default function Login(){
             alert(responseJson.message)
           }else{
             await saveItem("@token",responseJson.token)
-            return <Redirect href="/userScire/home" />;
+            router.replace("/userScire/home")
           }
         })
         .catch((error) => {
