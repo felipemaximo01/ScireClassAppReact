@@ -1,15 +1,15 @@
 import { View,Text,StyleSheet,TouchableOpacity,Pressable,Image } from "react-native";
 
-export function ModalOK({textOK,handleClose}){
+export function ModalBAD({textOK,handleClose}){
     return(
         <View style={styles.container}>
 
         <View style={styles.content}>
         <Image 
             style={styles.img} 
-            source={require("../../../assets/IconOK.png")}
+            source={require("../../../assets/IconBAD.png")}
             />
-            <Text style={styles.title}>Sucesso</Text>
+            <Text style={styles.title}>ERRO</Text>
             <Text style={styles.text}>{textOK}</Text>
             <View  style={styles.buttonArea}>
                 <TouchableOpacity style={[styles.button, styles.buttonSave]} onPress={handleClose}>
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
         justifyContent:'center',
     },
     buttonSave:{
-        backgroundColor:"#3D5CFF",
+        backgroundColor:"#FF0909",
         borderRadius:8
     },
     buttonSaveText:{

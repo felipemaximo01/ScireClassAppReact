@@ -1,11 +1,13 @@
-import { useCallback, useState } from 'react';
-import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { useCallback, useState, useEffect } from 'react';
+import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView, Modal } from 'react-native';
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link, Redirect,useRouter} from 'expo-router'
 import Checkbox from 'expo-checkbox';
 import useLocalhost from "./hooks/useLocalhost"
+import { ModalOK } from './componentes/modal/modalOK';
+import { ModalBAD } from './componentes/modal/modalBAD';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,6 +29,11 @@ export default function CadastraUsuario(){
     const [bairro, setBairro] = useState("")
     const [localidade, setLocalidade] = useState("")
     const [uf, setUf] = useState("")
+
+    const [modalOKVisible,setModalOKVisible] = useState(false)
+    const [modalBADVisible,setModalBADVisible] = useState(false)
+
+    const [textResponse,setTextResponse] = useState("")
 
 
     const[fontsLoaded,fontError] = useFonts({
@@ -57,18 +64,21 @@ export default function CadastraUsuario(){
       const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
 
       if(!nome.trim() || !senha.trim() || !email.trim() || !cep.trim() || !numero.trim()){
-        alert("Todos os campos precisam ser preenchidos!")
+        setTextResponse("Todos os campos precisam ser preenchidos!")
+        setModalBADVisible(true)
         return
       }
 
       if(reg.test(email) === false){
-        alert("Insira um email válido!")
+        setTextResponse("Insira um email válido!")
         setEmail("")
+        setModalBADVisible(true)
         return
       }
 
       if(!aceitouTermos){
-        alert("Para criar uma conta é necessário aceitar os termos e condiçõesdefaultValue!")
+        setTextResponse("Para criar uma conta é necessário aceitar os termos e condições!")
+        setModalBADVisible(true)
         return
       }
       
@@ -89,14 +99,14 @@ export default function CadastraUsuario(){
         uf: uf
       }
 
-      const json = {
+      const cadastroDTO = {
         usuarioDTO: usuarioDTO,
         enderecoDTO: enderecoDTO
       }
 
       fetch(`http://${localhost}:8080/scireclass/usuario/save`,{
         method:"post",
-        body: JSON.stringify(json),
+        body: JSON.stringify(cadastroDTO),
         headers:{
           "Content-type": "application/json",
           Accept: "application/json"
@@ -105,10 +115,11 @@ export default function CadastraUsuario(){
       .then((response) => response.json())
       .then(async (responseJson) => {
         if(responseJson.message !== undefined){
-          alert(responseJson.message)
+          setTextResponse(responseJson.message)
+          setModalBADVisible(true)
         }else{
-          alert("Cadastro Realizado Com Sucesso, para ativar sua conta verifique a sua caixa de emails.")
-          router.replace("/login")
+          setTextResponse("Cadastro Realizado Com Sucesso, para ativar sua conta verifique a sua caixa de emails.")
+          setModalOKVisible(true)
         }
       })
       .catch((error) => {
@@ -116,7 +127,7 @@ export default function CadastraUsuario(){
       });
     }
 
-    const checkCEP = (e) =>{
+    const checkCEP = () =>{
       if(cep.length === 8) {
         fetch(`https://viacep.com.br/ws/${cep}/json/`)
           .then(res => res.json())
@@ -136,6 +147,11 @@ export default function CadastraUsuario(){
         setCep("")
       }
     }
+
+    const handleClose = () => {
+      setModalBADVisible(false);
+      router.replace("/login");
+  };
 
     return(
         <ScrollView>
@@ -170,6 +186,12 @@ export default function CadastraUsuario(){
                     <Text style={styles.loginText}>Já tem uma conta? <Link href={"/login"} style={styles.linklogin}>Log in</Link></Text>
                     <TouchableOpacity onPress={handleCadastraUsuario} style={styles.formButton}><Text style={styles.buttonText}>Criar Conta</Text></TouchableOpacity>
                 </View>
+                <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
+                  <ModalOK textOK={textResponse} handleClose={handleClose}/>
+                </Modal>
+                <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
+                  <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)}/>
+                </Modal>
             </View>
         </ScrollView>
     )

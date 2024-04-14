@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View,TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View,TouchableOpacity, TextInput, Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link,Redirect,useRouter} from 'expo-router'
 import useStorage from "./hooks/useStorage"
 import useLocalhost from "./hooks/useLocalhost"
+import { ModalBAD } from './componentes/modal/modalBAD';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -18,6 +19,10 @@ export default function Login(){
     const [email,setEmail] = useState("")
     const [senha,setSenha] = useState("")
     const {saveItem} = useStorage();
+
+    const [modalBADVisible,setModalBADVisible] = useState(false)
+
+    const [textResponse,setTextResponse] = useState("")
 
     const[fontsLoaded,fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -47,13 +52,15 @@ export default function Login(){
         const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
 
         if(!senha.trim() || !email.trim()){
-          alert("Todos os campos precisam ser preenchidos!")
+          textResponse("Todos os campos precisam ser preenchidos!")
+          setModalBADVisible(true)
           return
         }
 
         if(reg.test(email) === false){
-          alert("Insira um email válido")
+          textResponse("Insira um email válido")
           setEmail("")
+          setModalBADVisible(true)
           return
         }
 
@@ -61,7 +68,8 @@ export default function Login(){
         .then((response) => response.json())
         .then(async (responseJson) => {
           if(responseJson.message !== undefined){
-            alert(responseJson.message)
+            setTextResponse(responseJson.message)
+            setModalBADVisible(true)
           }else{
             await saveItem("@token",responseJson.token)
             router.replace("/userScire/home")
@@ -86,6 +94,9 @@ export default function Login(){
                 <TouchableOpacity onPress={handleLoginUsuario} style={styles.formButton}><Text style={styles.buttonText}>Log in</Text></TouchableOpacity>
                 <Text style={styles.cadastroText}>Não tem uma conta? <Link href={"/cadastroUsuario"} style={styles.linkCadastra}>Sign up</Link></Text>
             </View>
+            <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
+                <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)}/>
+            </Modal>
         </View>
         
     )

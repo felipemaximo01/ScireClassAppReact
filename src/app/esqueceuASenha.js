@@ -2,22 +2,21 @@ import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View,TouchableOpacity, TextInput,Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {useRouter} from 'expo-router'
 import useLocalhost from "./hooks/useLocalhost"
 import { ModalOK } from './componentes/modal/modalOK';
+import { ModalBAD } from './componentes/modal/modalBAD';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function EsqueceuASenha(){
-
-    const router = useRouter();
 
     const {getLocalhost} = useLocalhost();
     const [localhost,setLocahost]  = useState("");
 
     const [email,setEmail] = useState("")
 
-    const [modalVisible,setModalVisible] = useState(false)
+    const [modalOKVisible,setModalOKVisible] = useState(false)
+    const [modalBADVisible,setModalBADVisible] = useState(false)
 
     const [textResponse,setTextResponse] = useState("")
 
@@ -49,25 +48,28 @@ export default function EsqueceuASenha(){
         const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
 
         if(!email.trim()){
-          alert("Todos os campos precisam ser preenchidos!")
+          setTextResponse("Todos os campos precisam ser preenchidos!")
+          setModalBADVisible(true)
           return
         }
 
         if(reg.test(email) === false){
-          alert("Insira um email válido")
+          setTextResponse("Insira um email válido")
           setEmail("")
+          setModalBADVisible(true)
           return
         }
 
         fetch(`http://${localhost}:8080/scireclass/usuario/resetSenha/${email}`)
         .then(async (response) => {
           if(!response.ok){
-            alert("ERRO")
+            const responseData = await response.json();
+            setTextResponse(responseData.message)
+            setModalBADVisible(true)
           }else{
-            const responseData = await response.text();
-            console.log(responseData) 
+            const responseData = await response.text(); 
             setTextResponse(responseData)
-            setModalVisible(true)
+            setModalOKVisible(true)
           }
         })
         .catch((error) => {
@@ -85,8 +87,11 @@ export default function EsqueceuASenha(){
                 <TextInput value={email} keyboardType='email-address' style={styles.formInput} onChangeText={(value) => setEmail(value)}/>
                 <TouchableOpacity onPress={handleEsqueceuASenha} style={styles.formButton}><Text style={styles.buttonText}>Enviar</Text></TouchableOpacity>
             </View>
-            <Modal visible={modalVisible} animationType='fade' transparent={true}>
-                <ModalOK textOK={textResponse} handleClose={() => setModalVisible(false)}/>
+            <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
+                <ModalOK textOK={textResponse} handleClose={() => setModalOKVisible(false)}/>
+            </Modal>
+            <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
+                <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)}/>
             </Modal>
         </View>
         
