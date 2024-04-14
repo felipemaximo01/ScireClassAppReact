@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View,TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View,TouchableOpacity, TextInput,Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {Link,Redirect,useRouter} from 'expo-router'
-import useStorage from "./hooks/useStorage"
+import {useRouter} from 'expo-router'
 import useLocalhost from "./hooks/useLocalhost"
+import { ModalOK } from './componentes/modal/modalOK';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,6 +16,10 @@ export default function EsqueceuASenha(){
     const [localhost,setLocahost]  = useState("");
 
     const [email,setEmail] = useState("")
+
+    const [modalVisible,setModalVisible] = useState(false)
+
+    const [textResponse,setTextResponse] = useState("")
 
     const[fontsLoaded,fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -56,13 +60,14 @@ export default function EsqueceuASenha(){
         }
 
         fetch(`http://${localhost}:8080/scireclass/usuario/resetSenha/${email}`)
-        .then((response) => response.json())
-        .then(async (responseJson) => {
-          if(responseJson.message !== undefined){
-            alert(responseJson.message)
+        .then(async (response) => {
+          if(!response.ok){
+            alert("ERRO")
           }else{
-            await saveItem("@token",responseJson.token)
-            router.replace("/userScire/home")
+            const responseData = await response.text();
+            console.log(responseData) 
+            setTextResponse(responseData)
+            setModalVisible(true)
           }
         })
         .catch((error) => {
@@ -80,6 +85,9 @@ export default function EsqueceuASenha(){
                 <TextInput value={email} keyboardType='email-address' style={styles.formInput} onChangeText={(value) => setEmail(value)}/>
                 <TouchableOpacity onPress={handleEsqueceuASenha} style={styles.formButton}><Text style={styles.buttonText}>Enviar</Text></TouchableOpacity>
             </View>
+            <Modal visible={modalVisible} animationType='fade' transparent={true}>
+                <ModalOK textOK={textResponse} handleClose={() => setModalVisible(false)}/>
+            </Modal>
         </View>
         
     )
