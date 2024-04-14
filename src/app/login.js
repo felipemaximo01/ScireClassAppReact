@@ -2,10 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View,TouchableOpacity, TextInput, Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {Link,Redirect,useRouter} from 'expo-router'
+import {Link,useRouter} from 'expo-router'
 import useStorage from "./hooks/useStorage"
 import useLocalhost from "./hooks/useLocalhost"
 import { ModalBAD } from './componentes/modal/modalBAD';
+import { ModalLoading } from './componentes/modal/modalLoading';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -23,6 +24,8 @@ export default function Login(){
     const [modalBADVisible,setModalBADVisible] = useState(false)
 
     const [textResponse,setTextResponse] = useState("")
+
+    const [modalLoadingVisible, setModalLoadingVisible]= useState(false)
 
     const[fontsLoaded,fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -64,9 +67,12 @@ export default function Login(){
           return
         }
 
+        setModalLoadingVisible(true)
+
         fetch(`http://${localhost}:8080/scireclass/usuario/login/${email}/${senha}`)
         .then((response) => response.json())
         .then(async (responseJson) => {
+          setModalLoadingVisible(false)
           if(responseJson.message !== undefined){
             setTextResponse(responseJson.message)
             setModalBADVisible(true)
@@ -96,6 +102,9 @@ export default function Login(){
             </View>
             <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
                 <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)}/>
+            </Modal>
+            <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
+                <ModalLoading/>
             </Modal>
         </View>
         

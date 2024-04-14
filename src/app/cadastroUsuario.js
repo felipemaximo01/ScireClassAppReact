@@ -1,13 +1,14 @@
 import { useCallback, useState, useEffect } from 'react';
-import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView, Modal } from 'react-native';
+import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView, Modal,ActivityIndicator } from 'react-native';
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {Link, Redirect,useRouter} from 'expo-router'
+import {Link,useRouter} from 'expo-router'
 import Checkbox from 'expo-checkbox';
 import useLocalhost from "./hooks/useLocalhost"
 import { ModalOK } from './componentes/modal/modalOK';
 import { ModalBAD } from './componentes/modal/modalBAD';
+import { ModalLoading } from './componentes/modal/modalLoading';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,6 +35,8 @@ export default function CadastraUsuario(){
     const [modalBADVisible,setModalBADVisible] = useState(false)
 
     const [textResponse,setTextResponse] = useState("")
+
+    const [modalLoadingVisible, setModalLoadingVisible]= useState(false)
 
 
     const[fontsLoaded,fontError] = useFonts({
@@ -81,6 +84,8 @@ export default function CadastraUsuario(){
         setModalBADVisible(true)
         return
       }
+
+      setModalLoadingVisible(true)
       
       const usuarioDTO = {
         nome: nome,
@@ -112,8 +117,9 @@ export default function CadastraUsuario(){
           Accept: "application/json"
         }
       })
-      .then((response) => response.json())
+      .then((response) => response.json() )
       .then(async (responseJson) => {
+        setModalLoadingVisible(false)
         if(responseJson.message !== undefined){
           setTextResponse(responseJson.message)
           setModalBADVisible(true)
@@ -191,6 +197,9 @@ export default function CadastraUsuario(){
                 </Modal>
                 <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
                   <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)}/>
+                </Modal>
+                <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
+                  <ModalLoading/>
                 </Modal>
             </View>
         </ScrollView>

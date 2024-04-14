@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import useLocalhost from "./hooks/useLocalhost"
 import { ModalOK } from './componentes/modal/modalOK';
 import { ModalBAD } from './componentes/modal/modalBAD';
+import { ModalLoading } from './componentes/modal/modalLoading';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,6 +20,8 @@ export default function EsqueceuASenha(){
     const [modalBADVisible,setModalBADVisible] = useState(false)
 
     const [textResponse,setTextResponse] = useState("")
+
+    const [modalLoadingVisible, setModalLoadingVisible]= useState(false)
 
     const[fontsLoaded,fontError] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -60,8 +63,11 @@ export default function EsqueceuASenha(){
           return
         }
 
+        setModalLoadingVisible(true)
+
         fetch(`http://${localhost}:8080/scireclass/usuario/resetSenha/${email}`)
         .then(async (response) => {
+          setModalLoadingVisible(false)
           if(!response.ok){
             const responseData = await response.json();
             setTextResponse(responseData.message)
@@ -92,6 +98,9 @@ export default function EsqueceuASenha(){
             </Modal>
             <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
                 <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)}/>
+            </Modal>
+            <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
+                <ModalLoading/>
             </Modal>
         </View>
         
