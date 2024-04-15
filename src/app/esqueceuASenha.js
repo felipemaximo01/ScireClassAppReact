@@ -158,6 +158,8 @@ const styles = StyleSheet.create({
         borderColor:"#B8B8D2",
         borderWidth:1,
         height:45,
-        marginBottom:20
+        marginBottom:20,
+        fontFamily:"Poppins-Regular",
+        paddingLeft:8
       },
 })

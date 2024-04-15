@@ -38,8 +38,10 @@ export default function Page1() {
 
   useEffect(() =>{
     async function jaLogado(){
-      const token = await getItem("@token")
-      if(token !== null && token !== undefined && token !== ""){
+      const getToken = await getItem("@token")
+      const getId = await getItem("@id")
+      if((getToken !== null && getToken !== undefined && getToken !== "")
+          && (getId !== null && getId !== undefined && getId !== "")){
         setShowHome(true)
       }else{
         setShowHome(false)

@@ -78,6 +78,7 @@ export default function Login(){
             setModalBADVisible(true)
           }else{
             await saveItem("@token",responseJson.token)
+            await saveItem("@id",responseJson.id)
             router.replace("/userScire/home")
           }
         })
@@ -162,7 +163,9 @@ const styles = StyleSheet.create({
         borderColor:"#B8B8D2",
         borderWidth:1,
         height:45,
-        marginBottom:20
+        marginBottom:20,
+        fontFamily:"Poppins-Regular",
+        paddingLeft:8
       },
       esqueceuASenha:{
         alignItems:'flex-end',
