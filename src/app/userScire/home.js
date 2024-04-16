@@ -71,6 +71,7 @@ export default function Home(){
       useEffect(() =>{
         async function userById(){
           if(token !== null && id !== null){
+          setModalLoadingVisible(true)
           fetch(`http://${localhost}:8080/scireclass/usuario/findbyid/${id}`,{
             headers:{
               Authorization: `Bearer ${token}`
