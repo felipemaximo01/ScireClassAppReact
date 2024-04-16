@@ -155,7 +155,7 @@ export default function CadastraUsuario(){
     }
 
     const handleClose = () => {
-      setModalBADVisible(false);
+      setModalOKVisible(false);
       router.replace("/login");
   };
 
