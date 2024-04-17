@@ -2,11 +2,13 @@ import { useCallback, useState, useEffect } from 'react';
 import { StyleSheet, Text, View,TouchableOpacity, TextInput, Pressable,Image,Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {useRouter} from 'expo-router'
+import {useRouter, Link} from 'expo-router'
 import useStorage from "../hooks/useStorage"
 import useLocalhost from "../hooks/useLocalhost"
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
+import * as Progress from 'react-native-progress';
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -105,6 +107,37 @@ export default function Home(){
                 </View>
                 <Pressable><Image source={require("../../assets/userIcon.png")} style={styles.userIcon}/></Pressable>
             </View>
+            <View style={[styles.titleContent, styles.elevation]}>
+              <View style={styles.textTitleContent}>
+                <Text style={styles.textBase}>Aprendi hoje</Text>
+                <Link style={styles.linkMeusCursos} href="/userScire/meusCursos">Meus cursos</Link>
+              </View>
+              <View style={styles.progressClass}>
+                <Text style={styles.minDone}>46MIN</Text>
+                <Text style={styles.minGoal}>/60min</Text>
+              </View>
+              <Progress.Bar progress={0.3} width={null} height={6} />
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardText}>Descubra por novos cursos!</Text>
+              <View style={styles.viewImg}>
+                <TouchableOpacity style={styles.buttonCard}><Text style={styles.textButtonCard}>Iniciar</Text></TouchableOpacity>
+                <Image style={styles.imgCard} source={require("../../assets/cardIcon.png")}/>
+              </View>
+            </View>
+            <View style={[styles.lastClass,styles.elevation]}>
+              <Text style={styles.titleLastClass}>Progresso</Text>
+              <View style={styles.lastCourses}>
+                <View style={{flexDirection:"row"}}>
+                  <Progress.Circle size={25} progress={0.8} thickness={4} borderWidth={0} color='#707070' fill='none'/>
+                  <Text style={styles.nameLastCourse}>Desing</Text>
+                </View>
+                <View style={{flexDirection:"row",}}>
+                  <Text style={styles.numberDoneLastCourse}>40</Text>
+                  <Text style={styles.numberClassesLastCourse}>/46</Text>
+                </View>
+              </View>
+            </View>
             <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
                 <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)}/>
             </Modal>
@@ -120,7 +153,7 @@ const styles = StyleSheet.create({
   container: {
       flex: 1,
       backgroundColor: '#fff',
-      alignItems: 'flex-start',
+      alignItems: 'center',
       justifyContent: 'flex-start',
   },
   title: {
@@ -131,16 +164,16 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: 16,
+      position: 'relative'
   },
   textContainer: {
-      flexDirection: 'column', // Para garantir que os textos fiquem em coluna
-      alignItems: 'flex-start', // Alinhar os textos à esquerda
+      flexDirection: 'column', 
+      alignItems: 'flex-start',
   },
   titleText: {
       fontFamily: 'Poppins-Bold',
       fontSize: 30,
       color: "#FFFFFF",
-      marginBottom: 8, // Espaçamento entre os textos
   },
   subTitleText: {
       fontFamily: 'Poppins-Regular',
@@ -150,5 +183,128 @@ const styles = StyleSheet.create({
   userIcon: {
       height: 49,
       width: 36,
+      marginBottom:50
+  },
+  titleContent:{
+    backgroundColor:"#FFFFFF",
+    width:"90%",
+    height:100,
+    position:'relative',
+    borderRadius:8,
+    marginTop:-35,
+    justifyContent:"center",
+    paddingLeft:12,
+    paddingRight:12
+  },
+  textTitleContent:{
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:"space-between",
+  },
+  progressClass:{
+    flexDirection:'row',
+    alignItems:'flex-start',
+  },
+  textBase:{
+    fontFamily:"Poppins-Regular",
+    fontSize:12,
+    color:"#858597"
+  },
+  linkMeusCursos:{
+    fontFamily:"Poppins-Regular",
+    fontSize:12,
+    color:"#3D5CFF"
+  },
+  minDone:{
+    fontFamily:"Poppins-Bold",
+    fontSize:20,
+    color:"#1F1F39",
+    marginRight:4
+  },
+  minGoal:{
+    fontFamily:"Poppins-Regular",
+    fontSize:10,
+    color:"#858597",
+    marginTop:8
+  },
+  elevation: {
+    elevation: 20,
+    shadowColor: '#52006A',
+  },
+  card:{
+    backgroundColor:"#CEECFE",
+    width:"80%",
+    height:154,
+    marginTop:16,
+    borderRadius:12,
+  },
+  cardText:{
+    fontFamily:"Poppins-Bold",
+    color:"#1F1F39",
+    fontSize:18,
+    position:"absolute",
+    padding:8,
+    zIndex:1
+  },
+  imgCard:{
+    width:119,
+    height:135,
+    marginTop:15
+  },
+  buttonCard:{
+    marginTop:20,
+    marginBottom:20,
+    width:100,
+    height:35,
+    alignItems:'center',
+    justifyContent:'center',
+    backgroundColor:'#FF6905',
+    borderRadius: 8,
+    marginLeft:32
+  },
+  textButtonCard:{
+    fontFamily:"Poppins-Bold",
+    color:"#FFFFFF",
+    fontSize:12
+  },
+  viewImg:{
+    alignItems:"flex-end",
+    justifyContent:"space-between",
+    flexDirection:"row"
+  },
+  lastClass:{
+    marginTop:16,
+    borderRadius:12,
+    width:"90%",
+    height:133,
+    backgroundColor:"#FFFFFF",
+    padding:8
+  },
+  titleLastClass:{
+    fontFamily:"Poppins-Bold",
+    color:"#1F1F39",
+    fontSize:18,
+  },
+  lastCourses:{
+    flexDirection:"row",
+    justifyContent: "space-between",
+    padding:8
+  },
+  nameLastCourse:{
+    fontFamily:"Poppins-Regular",
+    color:"#1F1F39",
+    fontSize:14,
+    marginLeft:6,
+    marginTop:2
+  },
+  numberDoneLastCourse:{
+    fontFamily:"Poppins-Regular",
+    color:"#1F1F39",
+    fontSize:14
+  },
+  numberClassesLastCourse:{
+    fontFamily:"Poppins-Regular",
+    color:"#B8B8D2",
+    fontSize:14
   }
 });

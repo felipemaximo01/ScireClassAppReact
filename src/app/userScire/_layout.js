@@ -8,23 +8,55 @@ export default function Layout(){
                 headerShown:false,
                 tabBarIcon:() => {
                     return <Image source={require("../../assets/homeIcon.png")}
-                        style={styles.img}/>
+                        style={styles.imgHome}/>
                 }}}/>
-            <Tabs.Screen name='cursos' options={{title: "Cursos",
-                headerShown:false}}/>
+            <Tabs.Screen name='meusCursos' options={{title: "Cursos",
+                headerShown:false,
+                tabBarIcon:() => {
+                    return <Image source={require("../../assets/meusCursosIcon.png")}
+                        style={styles.imgCursos}/>
+                }}}/>
             <Tabs.Screen name='procurar' options={{title: "Procurar",
-                headerShown:false}}/>
+                headerShown:false,
+                tabBarIcon:() => {
+                    return <Image source={require("../../assets/pesquisarIcon.png")}
+                        style={styles.imgPesquisar}/>
+                }}}/>
             <Tabs.Screen name='mensagem' options={{title: "Mensagens",
-                headerShown:false}}/>
+                headerShown:false,
+                tabBarIcon:() => {
+                    return <Image source={require("../../assets/mensagemIcon.png")}
+                        style={styles.imgMensagem}/>
+                }}}/>
             <Tabs.Screen name='favoritos' options={{title: "Favoritos",
-                headerShown:false}}/>
+                headerShown:false,
+                tabBarIcon:() => {
+                    return <Image source={require("../../assets/favoritoIcon.png")}
+                        style={styles.imgFavoritos}/>
+                }}}/>
         </Tabs>
     )
 }
 
 const styles = StyleSheet.create({
-    img:{
+    imgHome:{
         width:18.5,
         height:18.5
-    }
+    },
+    imgCursos:{
+        width:16,
+        height:20
+    },
+    imgPesquisar:{
+        width:17.38,
+        height:17.38,
+    },
+    imgMensagem:{
+        width:20,
+        height:18
+    },
+    imgFavoritos:{
+        width:20,
+        height:18
+    },
 })
