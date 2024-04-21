@@ -4,7 +4,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link,useRouter} from 'expo-router'
 import useStorage from "./hooks/useStorage"
-import useLocalhost from "./hooks/useLocalhost"
+import useLocalhost from "./hooks/useLocalHost"
 import { ModalBAD } from './componentes/modal/modalBAD';
 import { ModalLoading } from './componentes/modal/modalLoading';
 
