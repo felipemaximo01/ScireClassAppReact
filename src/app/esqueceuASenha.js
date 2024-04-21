@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View,TouchableOpacity, TextInput,Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import useLocalhost from "./hooks/useLocalHost"
+import useLocalhost from "./hooks/useLocalhost"
 import { ModalOK } from './componentes/modal/modalOK';
 import { ModalBAD } from './componentes/modal/modalBAD';
 import { ModalLoading } from './componentes/modal/modalLoading';
