@@ -4,7 +4,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {useRouter, Link} from 'expo-router'
 import useStorage from "../hooks/useStorage"
-import useLocalhost from "../hooks/useLocalHost"
+import useLocalhost from "../hooks/useLocalhost"
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import * as Progress from 'react-native-progress';

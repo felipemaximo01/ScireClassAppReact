@@ -5,7 +5,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link,useRouter} from 'expo-router'
 import Checkbox from 'expo-checkbox';
-import useLocalhost from "./hooks/useLocalHost"
+import useLocalhost from "./hooks/useLocalhost"
 import { ModalOK } from './componentes/modal/modalOK';
 import { ModalBAD } from './componentes/modal/modalBAD';
 import { ModalLoading } from './componentes/modal/modalLoading';

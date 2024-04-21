@@ -3,8 +3,8 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, Pressable, Image, 
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { Link, useRouter } from 'expo-router';
-import useLocalhost from "../hooks/useLocalHost";
-import { Rating } from '@mui/material';
+import useLocalhost from "../hooks/useLocalhost";
+
 
 
 
@@ -77,10 +77,14 @@ export default function Procurar() {
 
           <View style={[styles.card, styles.elevation]} >
             <Image style={styles.imgFavNot} source={require("../../assets/favoritoIconNot.png")}></Image>
-            <Image style={styles.imgCard} source={require("../../assets/cardIcon.png")} />
+            <Image style={styles.imgCard} source={require("../../assets/blankImage.png")} />
 
             <Text style={styles.cardTextTitle}>Nome do curso</Text>
             <Text style={styles.cardText}>Nome do professor</Text>
+            <Text style={styles.cardTextPrice}>R$0,00</Text>
+            <View style={styles.horas}>
+                <Text style={styles.horasText} >0 horas</Text>
+            </View>
 
 
           </View>
@@ -101,6 +105,23 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
   },
+  horas:{
+    position:"absolute",
+    right: 110,
+    bottom:6,
+    width: 60,
+    borderRadius:30,
+    backgroundColor:"#FFEBF0",
+    zIndex:5,
+    alignItems:"center",
+    padding: 2,
+  },
+  horasText:{
+    fontFamily:"Poppins-Regular",
+    fontSize: 12,
+    textAlign:"center",
+    color:"#FF6905"
+  },
   imgs: {
     zIndex: 5
   },
@@ -117,8 +138,8 @@ const styles = StyleSheet.create({
 
   },
   imgsubtract: {
-    width: 20,
-    height: 20,
+    width: 21,
+    height: 21,
     position: 'absolute',
     margin: 12,
     right: 30,
@@ -193,7 +214,16 @@ const styles = StyleSheet.create({
   },
 
 
-
+  cardTextPrice:{
+    fontFamily: "Poppins-Bold",
+    color: "#3D5CFF",
+    fontSize: 18,
+    position: "absolute",
+    padding: 8,
+    marginLeft: 130,
+    marginTop: 70,
+    zIndex: 1
+  },
   card: {
     backgroundColor: "#FFF",
     width: "100%",
@@ -209,7 +239,7 @@ const styles = StyleSheet.create({
   cardTextTitle: {
     fontFamily: "Poppins-Bold",
     color: "#1F1F39",
-    fontSize: 12,
+    fontSize: 15,
     position: "absolute",
     padding: 8,
     marginLeft: 130,
@@ -239,6 +269,7 @@ const styles = StyleSheet.create({
   imgCard: {
     width: 80,
     height: 80,
+    top: -5
 
   },
 
