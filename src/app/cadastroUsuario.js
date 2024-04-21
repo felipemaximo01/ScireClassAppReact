@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView, Modal,ActivityIndicator } from 'react-native';
-import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import  {RadioButtonGroup, RadioButtonItem } from "expo-radio-button";
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {Link,useRouter} from 'expo-router'

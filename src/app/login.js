@@ -79,6 +79,7 @@ export default function Login(){
           }else{
             await saveItem("@token",responseJson.token)
             await saveItem("@id",responseJson.id)
+            await saveItem("@perfil",responseJson.perfil)
             router.replace("/userScire/home")
           }
         })
