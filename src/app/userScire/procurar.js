@@ -5,9 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Link, useRouter } from 'expo-router';
 import useLocalhost from "../hooks/useLocalhost";
 
-
-
-
+SplashScreen.preventAutoHideAsync();
 
 export default function Procurar() {
   const router = useRouter();
@@ -20,27 +18,30 @@ export default function Procurar() {
     'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
   });
 
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
+  useEffect(() =>{
+    async function loadLocalhost(){
+      const host = await getLocalhost();
+      setLocahost(host);
+    }
+    loadLocalhost()
+  },[])
+
   const buscar = async () => {
-    fetch(`http://${localhost}:8080/scireclass/usuario/login/`)
-      .then((response) => response.json())
-      .then(async (responseJson) => {
-        setModalLoadingVisible(false)
-        if (responseJson.message !== undefined) {
-          setTextResponse(responseJson.message)
-          setModalBADVisible(true)
-        } else {
-          await saveItem("@token", responseJson.token)
-          await saveItem("@id", responseJson.id)
-          router.replace("/userScire/home")
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+
   }
   return (
     <ScrollView>
-      <View style={styles.form}>
+      <View onLayout={onLayoutRootView} style={styles.form}>
         <View style={styles.container}>
           <View style={styles.title}>
             <Text style={styles.titleText}>Procurar</Text>

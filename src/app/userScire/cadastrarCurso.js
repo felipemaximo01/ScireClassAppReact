@@ -94,6 +94,8 @@ export default function cadastrarCurso(){
                         setTextResponse(data.message)
                         setModalBADVisible(true)
                     }
+                }).catch((error) => {
+                  console.log(error);
                 })
         }
         }
