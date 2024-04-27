@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { Link, useRouter } from 'expo-router';
 import useLocalhost from "../hooks/useLocalhost";
+import { ModalFilter } from '../componentes/modal/modalFilter';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,6 +18,11 @@ export default function Procurar() {
     'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
   });
+  const [modalFilterVisible,setModalFilterVisible] = useState(false)
+  function filterShow(){
+    setModalFilterVisible(true)
+  }
+
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded || fontError) {
@@ -55,7 +61,7 @@ export default function Procurar() {
               </View>
 
               <View>
-                <Pressable style={styles.imgs} ><Image style={styles.imgFilter} source={require("../../assets/filterIcon.png")} /></Pressable>
+                <Pressable onPress={filterShow} style={styles.imgs} ><Image style={styles.imgFilter} source={require("../../assets/filterIcon.png")}  /></Pressable>
 
               </View>
               <TextInput placeholder='O que você proucura ?' style={styles.formInput} />
@@ -94,6 +100,9 @@ export default function Procurar() {
 
 
         </View>
+        <Modal visible={modalFilterVisible} animationType='slide' transparent={true}>
+                  <ModalFilter  handleClose={() => setModalFilterVisible(false)} />
+                </Modal>
       </View>
     </ScrollView>
   )
