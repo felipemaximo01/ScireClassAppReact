@@ -28,7 +28,6 @@ export default function Layout(){
             }else if(perfil == "PROFESSOR"){
                 setProfessor("/userScire/cadastrarCurso")
             }
-            console.log(perfil)
         }
         setProfile()
       },[perfil])

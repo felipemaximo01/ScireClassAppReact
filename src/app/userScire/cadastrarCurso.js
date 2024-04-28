@@ -1,9 +1,8 @@
 import { useCallback, useState, useEffect } from 'react';
-import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView, Modal,FileInput } from 'react-native';
+import { StyleSheet, Text, View,TouchableOpacity, TextInput, ScrollView, Modal, Button } from 'react-native';
 import  {RadioButtonGroup, RadioButtonItem } from "expo-radio-button";
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {Link} from 'expo-router'
 import Checkbox from 'expo-checkbox';
 import useLocalhost from "../hooks/useLocalhost"
 import useStorage from '../hooks/useStorage';
@@ -11,8 +10,10 @@ import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import {Picker} from '@react-native-picker/picker';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+
+
 
 
 SplashScreen.preventAutoHideAsync();
@@ -37,6 +38,8 @@ export default function cadastrarCurso(){
     const [localidade, setLocalidade] = useState("")
     const [uf, setUf] = useState("");
     const [categoriaId, setCategoriaId] = useState("");
+
+    const [image,setImage] = useState();
 
     const [categorias, setCategorias] = useState("")
 
@@ -106,7 +109,7 @@ export default function cadastrarCurso(){
 
       const id = await getItem("@id");
 
-      if(!nome.trim() || !descricao.trim() || !modalidade.trim() || !link.trim() || !telefone.trim() || !vagas.trim()){
+      if(!nome.trim() || !descricao.trim() || !link.trim() || !telefone.trim() || !vagas.trim()){
         setTextResponse("Todos os campos precisam ser preenchidos!")
         setModalBADVisible(true)
         return
@@ -114,6 +117,11 @@ export default function cadastrarCurso(){
 
       if(!aceitouTermos){
         setTextResponse("Para cadastrar um curso é necessário aceitar os termos e condições!")
+        setModalBADVisible(true)
+        return
+      }
+      if(image == null || image == undefined){
+        setTextResponse("Para cadastrar um curso é selecionar uma thumbnail!")
         setModalBADVisible(true)
         return
       }
@@ -140,21 +148,23 @@ export default function cadastrarCurso(){
         uf: uf
       }
       const categoriaDTO = {
-        id: categoriaId,
+        id: categoriaId
       }
 
       const cadastroCursoDTO = {
         cursoDTO: cursoDTO,
         enderecoDTO: enderecoDTO,
-        categoriaDTO: categoriaDTO
+        categoriaDTO: categoriaDTO,
+        imageBase64: image
       }
 
+      const token = await getItem("@token")
       fetch(`http://${localhost}:8080/scireclass/curso/save/${id}`,{
         method:"post",
         body: JSON.stringify(cadastroCursoDTO),
         headers:{
-          "Content-type": "application/json",
-          Accept: "application/json"
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       })
       .then((response) => response.json() )
@@ -170,6 +180,7 @@ export default function cadastrarCurso(){
       })
       .catch((error) => {
         console.error('Error:', error);
+        setModalLoadingVisible(false)
       });
     }
 
@@ -194,6 +205,17 @@ export default function cadastrarCurso(){
       }
     }
 
+    const selectImage = async () =>{
+            const doc = await DocumentPicker.getDocumentAsync({
+              type: 'image/*'
+            });
+            if(!doc.canceled){
+              let base64Image = await FileSystem.readAsStringAsync(doc.assets[0].uri, { encoding: 'base64' })
+              console.log(base64Image)
+              setImage(base64Image)
+            }
+    }
+
     return(
         <ScrollView>
             <View onLayout={onLayoutRootView} style={styles.container}>
@@ -208,7 +230,7 @@ export default function cadastrarCurso(){
                         onSelected={(value) => setModalidade(value)}
                         radioBackground="#3D5CFF">
                         <RadioButtonItem value="PRESENCIAL" label={<Text style={styles.formText}>Presencial</Text>}/>
-                        <RadioButtonItem value="ONLINE" label={<Text style={styles.formText}>Online (Assíncronos)</Text>}/>
+                        <RadioButtonItem value="ONLINE" label={<Text style={styles.formText}>Online (Assíncronas)</Text>}/>
                     </RadioButtonGroup>
                     <Text style={styles.formText}>Nome</Text>
                     <TextInput onChangeText={(value) => setNome(value)} style={styles.formInput}/>
@@ -221,11 +243,11 @@ export default function cadastrarCurso(){
                     <Text style={styles.formText}>Valor</Text>
                     <TextInput keyboardType='numeric' onChangeText={(value) => setValor(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>Vagas</Text>
-                    <TextInput keyboardType='number-pad' onChangeText={(value) => setTelefone(value)} style={styles.formInput}/>
+                    <TextInput keyboardType='number-pad' onChangeText={(value) => setVagas(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>Categoria</Text>
                     {fetchCategoriasConcluido ?
-                    <Picker onValueChange={(itemValue,itemIndex) =>
-                        setCategoriaId(itemValue)
+                    <Picker selectedValue={categoriaId} onValueChange={(itemValue,itemIndex) =>{
+                        setCategoriaId(itemValue)                      }
                     }>
                         {categorias.map((categoria) => (
                             <Picker.Item label={categoria.nome} value={categoria.id} />
@@ -240,12 +262,12 @@ export default function cadastrarCurso(){
                     <TextInput keyboardType='phone-pad' value={cep} onBlur={checkCEP} onChangeText={(value) => setCep(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>N° residencial</Text>
                     <TextInput keyboardType='phone-pad' onChangeText={(value) => setNumero(value)} style={styles.formInput}/>
-                    <Text style={styles.formText}>Escolha um icone para o seu curso</Text>
-                    <View style={{flexDirection:'row'}}>
+                    <Button title='selecione uma thumbnail' onPress={selectImage}/>
+                    <View style={{flexDirection:'row', marginTop:8}}>
                         <Checkbox value={aceitouTermos} onValueChange={setAceitouTermos} style={styles.checkBox}/> 
                         <Text style={styles.formText}>Ao cadastrar um curso você tem que concordar com nossos termos e condição.</Text>
                     </View>
-                    <TouchableOpacity onPress={handleCadastraCurso} style={styles.formButton}><Text style={styles.buttonText}>Criar Conta</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={handleCadastraCurso} style={styles.formButton}><Text style={styles.buttonText}>Cadastrar um curso</Text></TouchableOpacity>
                 </View>
                 <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
                   <ModalOK textOK={textResponse} handleClose={() => setModalOKVisible(false)}/>
