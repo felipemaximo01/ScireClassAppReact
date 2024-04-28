@@ -25,6 +25,9 @@ export default function Home(){
 
     const [usuarioDTO, setUsuarioDTO] = useState("");
 
+    const [lastCursos, setLastCursos] = useState("");
+    const [fetchLastCursos, setFetchLastCursos] = useState(false)
+
     const [modalBADVisible,setModalBADVisible] = useState(false)
 
     const [modalLoadingVisible, setModalLoadingVisible]= useState(false)
@@ -98,6 +101,35 @@ export default function Home(){
         userById();
       },[token,id])
 
+      useEffect(() =>{
+        async function lastCursosUser(){
+          if(token !== null && id !== null){
+          setModalLoadingVisible(true)
+          fetch(`http://${localhost}:8080/scireclass/matricula/curso/${id}`,{
+            headers:{
+              Authorization: `Bearer ${token}`
+            }
+          })
+            .then((response) => response.json())
+            .then(async (responseJson) => {
+          setModalLoadingVisible(false)
+          if(responseJson.message !== undefined){
+            setTextResponse(responseJson.message)
+            setModalBADVisible(true)
+          }else{
+            setLastCursos(responseJson)
+            setFetchLastCursos(true)
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+      }
+
+        };
+        lastCursosUser();
+      },[token,id])
+
       return(
         <View onLayout={onLayoutRootView} style={styles.container}>
             <View style={styles.title}>
@@ -121,23 +153,29 @@ export default function Home(){
             <View style={styles.card}>
               <Text style={styles.cardText}>Descubra por novos cursos!</Text>
               <View style={styles.viewImg}>
+                <Link href={"/userScire/procurar"} asChild>
                 <TouchableOpacity style={styles.buttonCard}><Text style={styles.textButtonCard}>Iniciar</Text></TouchableOpacity>
+                </Link>
                 <Image style={styles.imgCard} source={require("../../assets/cardIcon.png")}/>
               </View>
             </View>
+            {fetchLastCursos ?
             <View style={[styles.lastClass,styles.elevation]}>
               <Text style={styles.titleLastClass}>Progresso</Text>
+              {lastCursos.map(function(curso, i){
               <View style={styles.lastCourses}>
                 <View style={{flexDirection:"row"}}>
                   <Progress.Circle size={25} progress={0.8} thickness={4} borderWidth={0} color='#707070' fill='none'/>
-                  <Text style={styles.nameLastCourse}>Desing</Text>
+                  <Text style={styles.nameLastCourse}>{curso.nome}</Text>
                 </View>
                 <View style={{flexDirection:"row",}}>
                   <Text style={styles.numberDoneLastCourse}>40</Text>
-                  <Text style={styles.numberClassesLastCourse}>/46</Text>
+                  <Text style={styles.numberClassesLastCourse}>/{curso.quantidadeAulas}</Text>
                 </View>
               </View>
+              })}
             </View>
+             : <Text></Text>}
             <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
                 <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)}/>
             </Modal>

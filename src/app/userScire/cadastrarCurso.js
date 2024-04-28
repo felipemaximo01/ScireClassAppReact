@@ -109,7 +109,7 @@ export default function cadastrarCurso(){
 
       const id = await getItem("@id");
 
-      if(!nome.trim() || !descricao.trim() || !link.trim() || !telefone.trim() || !vagas.trim()){
+      if(!nome.trim() || !descricao.trim() || !link.trim() || !telefone.trim() || !vagas.trim() || !categoriaId.trim()){
         setTextResponse("Todos os campos precisam ser preenchidos!")
         setModalBADVisible(true)
         return
@@ -121,7 +121,7 @@ export default function cadastrarCurso(){
         return
       }
       if(image == null || image == undefined){
-        setTextResponse("Para cadastrar um curso é selecionar uma thumbnail!")
+        setTextResponse("Para cadastrar um curso é necessario selecionar uma thumbnail!")
         setModalBADVisible(true)
         return
       }
@@ -249,6 +249,9 @@ export default function cadastrarCurso(){
                     <Picker selectedValue={categoriaId} onValueChange={(itemValue,itemIndex) =>{
                         setCategoriaId(itemValue)                      }
                     }>
+                    <Picker>
+                        <Picker.Item label="--------" value="" />
+                    </Picker>
                         {categorias.map((categoria) => (
                             <Picker.Item label={categoria.nome} value={categoria.id} />
                         ))}
