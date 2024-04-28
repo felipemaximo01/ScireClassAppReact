@@ -33,7 +33,9 @@ export default function Layout(){
       },[perfil])
 
     return(
-        <Tabs screenOptions={{headerShown: false,tabBarHideOnKeyboard: true }}>
+        <Tabs screenOptions={({route}) => ({headerShown: false,tabBarHideOnKeyboard: true, tabBarStyle: {
+            display: route.name === 'curso' ? 'none' : 'flex'
+        } })}>
             <Tabs.Screen name='home' options={{title: "Home",
                 headerShown:false,
                 tabBarIcon:() => {
@@ -72,6 +74,10 @@ export default function Layout(){
                  return <Image source={require("../../assets/favoritoIcon.png")}
                      style={styles.imgFavoritos}/>
              }}}/>
+            <Tabs.Screen name='curso' options={{title: "Curso",
+             headerShown:false,
+             href:null
+             }}/>
         </Tabs>
     )
 }
