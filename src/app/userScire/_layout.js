@@ -76,7 +76,6 @@ export default function Layout(){
              }}}/>
             <Tabs.Screen name='curso' options={{title: "Curso",
              headerShown:false,
-             href:null
              }}/>
         </Tabs>
     )

@@ -14,6 +14,8 @@ export default function Curso({cursoId}){
 
     const [curso,setCurso] = useState();
 
+    const [aulas,setAulas] = useState();
+
     const [modalBADVisible,setModalBADVisible] = useState(false)
     const [modalLoadingVisible, setModalLoadingVisible]= useState(false)
     const [modalOKVisible,setModalOKVisible] = useState(false)
@@ -21,6 +23,7 @@ export default function Curso({cursoId}){
     const [textResponse,setTextResponse] = useState("")
 
     const [fetchConcluida, setFetchConcluida] = useState(false)
+    const [fetchAulaConcluida, setFetchAulaConcluida] = useState(false)
 
     const {getItem} = useStorage();
     const {getLocalhost} = useLocalhost();
@@ -71,6 +74,37 @@ export default function Curso({cursoId}){
             cursoById();
         },[])
 
+        useEffect(() =>{
+            async function aulaByCusoId(){
+                const localhost = await getLocalhost();
+                const token = await getItem("@token");
+    
+                cursoId = '662e09bf311c630d666e764a';
+                setModalLoadingVisible(true)
+                fetch(`http://${localhost}:8080/scireclass/aula/getlistaulas/${cursoId}`,{
+                    headers:{
+                    Authorization: `Bearer ${token}`
+                    }
+                })
+                    .then((response) => response.json())
+                    .then(async (responseJson) => {
+                setModalLoadingVisible(false)
+                if(responseJson.message !== undefined){
+                    setTextResponse(responseJson.message)
+                    setModalBADVisible(true)
+                    setFetchAulaConcluida(true)
+                }else{
+                    setAulas(responseJson)
+                    setFetchAulaConcluida(true)
+                }
+                })
+                .catch((error) => {
+                console.error('Error:', error);
+                });
+            }
+                aulaByCusoId();
+            },[])
+
     return(
             <View onLayout={onLayoutRootView} style={styles.container}>
                 {fetchConcluida ?
@@ -84,17 +118,19 @@ export default function Curso({cursoId}){
                             <Text style={styles.textTitleCurso}>{curso.nome}</Text><Text style={styles.priceTitleCurso}>R${curso.valor}</Text>
                         </View>
                         <View style={styles.statsCurso}>
-                            <Text style={styles.timeCurso}>Duracao - Quantidade De Aulas</Text>
+                            <Text style={styles.timeCurso}>Duracao - {curso.quantidadeAulas} Lições</Text>
                             <Text style={styles.avaliacaoCurso}>Avalliação:</Text>
                         </View>
                         <View style={styles.aboutCurso}>
                             <Text style={styles.titleAbout}>Sobre este curso</Text>
                             <Text style={styles.textAbout}>{curso.descricao}</Text>
                         </View>
-                        <View style={styles.aulaCurso}>
-                            <Text style={styles.numberAula}>01</Text>
-                            <Text style={styles.titleAula}>Bem-vindo ao Curso</Text>
+                        {fetchAulaConcluida ? aulas.map((aula, i) => (
+                        <View key={i} style={styles.aulaCurso}>
+                            <Text style={styles.numberAula}>{aula.ordem+1}</Text>
+                            <Text style={styles.titleAula}>{aula.nome}</Text>
                         </View>
+                        )) : <Text></Text>} 
                     </View>
                 </ScrollView>
                 <View style={styles.viewButton}>
