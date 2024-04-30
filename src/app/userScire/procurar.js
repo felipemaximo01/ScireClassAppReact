@@ -18,8 +18,8 @@ export default function Procurar() {
     'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
   });
-  const [modalFilterVisible,setModalFilterVisible] = useState(false)
-  function filterShow(){
+  const [modalFilterVisible, setModalFilterVisible] = useState(false)
+  function filterShow() {
     setModalFilterVisible(true)
   }
 
@@ -34,13 +34,13 @@ export default function Procurar() {
     return null;
   }
 
-  useEffect(() =>{
-    async function loadLocalhost(){
+  useEffect(() => {
+    async function loadLocalhost() {
       const host = await getLocalhost();
       setLocahost(host);
     }
     loadLocalhost()
-  },[])
+  }, [])
 
   const buscar = async () => {
 
@@ -56,12 +56,12 @@ export default function Procurar() {
                 <Pressable style={styles.imgs} ><Image style={styles.imgSearch} source={require("../../assets/SearchIcon.png")} /></Pressable>
               </View>
               <View>
-              <Pressable style={styles.imgs} ><Image style={styles.imgsubtract} source={require("../../assets/subtractIcon.png")} /></Pressable>
-                
+                <Pressable style={styles.imgs} ><Image style={styles.imgsubtract} source={require("../../assets/subtractIcon.png")} /></Pressable>
+
               </View>
 
               <View>
-                <Pressable onPress={filterShow} style={styles.imgs} ><Image style={styles.imgFilter} source={require("../../assets/filterIcon.png")}  /></Pressable>
+                <Pressable onPress={filterShow} style={styles.imgs} ><Image style={styles.imgFilter} source={require("../../assets/filterIcon.png")} /></Pressable>
 
               </View>
               <TextInput placeholder='O que você proucura ?' style={styles.formInput} />
@@ -90,19 +90,19 @@ export default function Procurar() {
             <Text style={styles.cardText}>Nome do professor</Text>
             <Text style={styles.cardTextPrice}>R$0,00</Text>
             <View style={styles.horas}>
-                <Text style={styles.horasText} >0 horas</Text>
+              <Text style={styles.horasText} >0 horas</Text>
             </View>
 
 
           </View>
-          
+
 
 
 
         </View>
         <Modal visible={modalFilterVisible} animationType='slide' transparent={true}>
-                  <ModalFilter  handleClose={() => setModalFilterVisible(false)} />
-                </Modal>
+          <ModalFilter handleClose={() => setModalFilterVisible(false)} />
+        </Modal>
       </View>
     </ScrollView>
   )
@@ -115,27 +115,27 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
   },
-  horas:{
-    position:"absolute",
+  horas: {
+    position: "absolute",
     right: 110,
-    bottom:6,
+    bottom: 6,
     width: 60,
-    borderRadius:30,
-    backgroundColor:"#FFEBF0",
-    zIndex:5,
-    alignItems:"center",
+    borderRadius: 30,
+    backgroundColor: "#FFEBF0",
+    zIndex: 5,
+    alignItems: "center",
     padding: 2,
   },
-  horasText:{
-    fontFamily:"Poppins-Regular",
+  horasText: {
+    fontFamily: "Poppins-Regular",
     fontSize: 12,
-    textAlign:"center",
-    color:"#FF6905"
+    textAlign: "center",
+    color: "#FF6905"
   },
   imgs: {
     zIndex: 5
   },
-  imgFavNot:{
+  imgFavNot: {
     width: 27,
     height: 25,
     position: 'absolute',
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   },
 
 
-  cardTextPrice:{
+  cardTextPrice: {
     fontFamily: "Poppins-Bold",
     color: "#3D5CFF",
     fontSize: 18,

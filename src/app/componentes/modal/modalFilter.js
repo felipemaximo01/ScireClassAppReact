@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image } from "react-native";
 import { useCallback, useEffect, useState } from 'react';
 import { InputRange } from "../InputRange";
 
@@ -43,7 +43,7 @@ export function ModalFilter({ handleClose }) {
                 </View>
                 <View>
                     <Text style={styles.titlePreco}>Preço</Text>
-                    <InputRange minValue ={0} maxValue={100} onChangeMin={(v)=>console.log} onChangeMax ={(v)=>console.log}/>
+                    <InputRange minValue={0} maxValue={100} onChangeMin={(v) => console.log} onChangeMax={(v) => console.log} />
                 </View>
 
             </View>
