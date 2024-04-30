@@ -21,7 +21,6 @@ SplashScreen.preventAutoHideAsync();
 export default function cadastrarCurso(){
 
     const {getLocalhost} = useLocalhost();
-    const [localhost,setLocahost]  = useState("");
 
     const [modalidade, setModalidade] = useState("ONLINE");
     const [nome, setNome] = useState("");
@@ -41,9 +40,7 @@ export default function cadastrarCurso(){
 
     const [image,setImage] = useState();
 
-    const [categorias, setCategorias] = useState("")
-
-    const [fetchCategoriasConcluido, setFetchCategoriasConcluido] = useState(false)
+    const [categorias, setCategorias] = useState([])
 
     const [modalOKVisible,setModalOKVisible] = useState(false)
     const [modalBADVisible,setModalBADVisible] = useState(false)
@@ -70,19 +67,11 @@ export default function cadastrarCurso(){
         return null;
     }
 
-    useEffect(() =>{
-      async function loadLocalhost(){
-        const host = await getLocalhost();
-        setLocahost(host);
-      }
-      loadLocalhost()
-    },[])
-
     useEffect(() => {
         async function getCategorias(){
-            if(localhost != ""){
-                const token = await getItem("@token")
-                fetch(`http://${localhost}:8080/scireclass/categoria`,{
+          const localhost = await getLocalhost();
+          const token = await getItem("@token")
+          fetch(`http://${localhost}:8080/scireclass/categoria`,{
                     method: 'GET',
                         headers:{
                             Authorization: `Bearer ${token}`
@@ -92,7 +81,6 @@ export default function cadastrarCurso(){
                     const data = await response.json();
                     if(response.ok){
                         setCategorias(data);
-                        setFetchCategoriasConcluido(true);
                     }else{
                         setTextResponse(data.message)
                         setModalBADVisible(true)
@@ -101,9 +89,8 @@ export default function cadastrarCurso(){
                   console.log(error);
                 })
         }
-        }
         getCategorias();
-    },[localhost])
+    },[])
 
     const handleCadastraCurso = async () =>{
 
@@ -245,22 +232,12 @@ export default function cadastrarCurso(){
                     <Text style={styles.formText}>Vagas</Text>
                     <TextInput keyboardType='number-pad' onChangeText={(value) => setVagas(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>Categoria</Text>
-                    {fetchCategoriasConcluido ?
-                    <Picker selectedValue={categoriaId} onValueChange={(itemValue,itemIndex) =>{
-                        setCategoriaId(itemValue)                      }
-                    }>
-                    <Picker>
-                        <Picker.Item label="--------" value="" />
-                    </Picker>
-                        {categorias.map((categoria) => (
-                            <Picker.Item label={categoria.nome} value={categoria.id} />
+                    <Picker selectedValue={categoriaId} onValueChange={(itemValue,itemIndex) =>{setCategoriaId(itemValue)}}>
+                        <Picker.Item label="Escolha uma categoria" value="" />
+                        {categorias?.map((categoria, i) => (
+                            <Picker.Item label={categoria.nome} value={categoria.id} key={i}/>
                         ))}
                     </Picker>
-                        :
-                    <Picker>
-                        <Picker.Item label="Carregando..." value="" />
-                    </Picker>
-                    }
                     <Text style={styles.formText}>CEP</Text>
                     <TextInput keyboardType='phone-pad' value={cep} onBlur={checkCEP} onChangeText={(value) => setCep(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>N° residencial</Text>

@@ -25,8 +25,7 @@ export default function Home(){
 
     const [usuarioDTO, setUsuarioDTO] = useState("");
 
-    const [lastCursos, setLastCursos] = useState("");
-    const [fetchLastCursos, setFetchLastCursos] = useState(false)
+    const [lastCursos, setLastCursos] = useState([]);
 
     const [modalBADVisible,setModalBADVisible] = useState(false)
 
@@ -118,7 +117,6 @@ export default function Home(){
             setModalBADVisible(true)
           }else{
             setLastCursos(responseJson)
-            setFetchLastCursos(true)
           }
         })
         .catch((error) => {
@@ -159,11 +157,10 @@ export default function Home(){
                 <Image style={styles.imgCard} source={require("../../assets/cardIcon.png")}/>
               </View>
             </View>
-            {fetchLastCursos ?
             <View style={[styles.lastClass,styles.elevation]}>
               <Text style={styles.titleLastClass}>Progresso</Text>
-              {lastCursos.map(function(curso, i){
-              <View style={styles.lastCourses}>
+              {lastCursos?.map((curso, i) =>(
+              <View key={i} style={styles.lastCourses}>
                 <View style={{flexDirection:"row"}}>
                   <Progress.Circle size={25} progress={0.8} thickness={4} borderWidth={0} color='#707070' fill='none'/>
                   <Text style={styles.nameLastCourse}>{curso.nome}</Text>
@@ -173,9 +170,8 @@ export default function Home(){
                   <Text style={styles.numberClassesLastCourse}>/{curso.quantidadeAulas}</Text>
                 </View>
               </View>
-              })}
+            ))}
             </View>
-             : <Text></Text>}
             <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
                 <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)}/>
             </Modal>

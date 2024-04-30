@@ -12,18 +12,19 @@ SplashScreen.preventAutoHideAsync();
 
 export default function Curso({cursoId}){
 
-    const [curso,setCurso] = useState();
+    const [curso,setCurso] = useState([]);
 
-    const [aulas,setAulas] = useState();
+    const [aulas,setAulas] = useState([]);
+
+    const [imagem,setImagem] = useState("");
+
+    const [imageUrl, setImageUrl] = useState("");
 
     const [modalBADVisible,setModalBADVisible] = useState(false)
     const [modalLoadingVisible, setModalLoadingVisible]= useState(false)
     const [modalOKVisible,setModalOKVisible] = useState(false)
 
     const [textResponse,setTextResponse] = useState("")
-
-    const [fetchConcluida, setFetchConcluida] = useState(false)
-    const [fetchAulaConcluida, setFetchAulaConcluida] = useState(false)
 
     const {getItem} = useStorage();
     const {getLocalhost} = useLocalhost();
@@ -42,6 +43,14 @@ export default function Curso({cursoId}){
     if (!fontsLoaded && !fontError) {
         return null;
     }
+
+    useEffect(() =>{
+        async function loadLocalhost(){
+          const host = await getLocalhost();
+          setImageUrl(host);
+        }
+        loadLocalhost()
+      },[])
     
     useEffect(() =>{
         async function cursoById(){
@@ -61,10 +70,8 @@ export default function Curso({cursoId}){
             if(responseJson.message !== undefined){
                 setTextResponse(responseJson.message)
                 setModalBADVisible(true)
-                setFetchConcluida(true)
             }else{
                 setCurso(responseJson)
-                setFetchConcluida(true)
             }
             })
             .catch((error) => {
@@ -75,7 +82,7 @@ export default function Curso({cursoId}){
         },[])
 
         useEffect(() =>{
-            async function aulaByCusoId(){
+            async function aulaByCursoId(){
                 const localhost = await getLocalhost();
                 const token = await getItem("@token");
     
@@ -92,25 +99,49 @@ export default function Curso({cursoId}){
                 if(responseJson.message !== undefined){
                     setTextResponse(responseJson.message)
                     setModalBADVisible(true)
-                    setFetchAulaConcluida(true)
                 }else{
                     setAulas(responseJson)
-                    setFetchAulaConcluida(true)
                 }
                 })
                 .catch((error) => {
                 console.error('Error:', error);
                 });
             }
-                aulaByCusoId();
+                aulaByCursoId();
             },[])
 
+            useEffect(() =>{
+                async function imagemByCursoId(){
+                    const localhost = await getLocalhost();
+                    const token = await getItem("@token");
+        
+                    cursoId = '662e09bf311c630d666e764a';
+                    setModalLoadingVisible(true)
+                    fetch(`http://${localhost}:8080/scireclass/imagem/curso/${cursoId}`,{
+                        headers:{
+                        Authorization: `Bearer ${token}`
+                        }
+                    })
+                        .then((response) => response.json())
+                        .then(async (responseJson) => {
+                    setModalLoadingVisible(false)
+                    if(responseJson.message !== undefined){
+                        setTextResponse(responseJson.message)
+                        setModalBADVisible(true)
+                    }else{
+                        setImagem(responseJson)
+                    }
+                    })
+                    .catch((error) => {
+                    console.error('Error:', error);
+                    });
+                }
+                    imagemByCursoId();
+                },[])
     return(
             <View onLayout={onLayoutRootView} style={styles.container}>
-                {fetchConcluida ?
-                <>
                 <View style={styles.viewImage}>
-                    <Image style={styles.img} source={require("../../assets/testeTelaCurso.jpg")}/>
+                    <Image style={styles.img} source={{uri:`http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${imagem.path}`}}/>
                 </View>
                 <ScrollView style={styles.body}>
                     <View>
@@ -125,12 +156,12 @@ export default function Curso({cursoId}){
                             <Text style={styles.titleAbout}>Sobre este curso</Text>
                             <Text style={styles.textAbout}>{curso.descricao}</Text>
                         </View>
-                        {fetchAulaConcluida ? aulas.map((aula, i) => (
+                        {aulas?.map((aula, i) => (
                         <View key={i} style={styles.aulaCurso}>
                             <Text style={styles.numberAula}>{aula.ordem+1}</Text>
                             <Text style={styles.titleAula}>{aula.nome}</Text>
                         </View>
-                        )) : <Text></Text>} 
+                        ))} 
                     </View>
                 </ScrollView>
                 <View style={styles.viewButton}>
@@ -146,10 +177,6 @@ export default function Curso({cursoId}){
                 <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
                   <ModalLoading/>
                 </Modal>
-                </> :                 
-                <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
-                  <ModalLoading/>
-                </Modal>}
             </View>
     )
 }
