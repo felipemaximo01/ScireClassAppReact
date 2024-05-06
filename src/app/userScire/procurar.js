@@ -88,10 +88,9 @@ export default function Procurar() {
               <View>
                 <Pressable style={styles.imgs} ><Image style={styles.imgSearch} source={require("../../assets/SearchIcon.png")} /></Pressable>
               </View>
-              <View>
-              <Pressable style={styles.imgs} ><Image style={styles.imgsubtract} source={require("../../assets/subtractIcon.png")} /></Pressable>
-                
-              </View>
+              <View >
+              <Pressable style={[styles.imgs, { display: visibleSubstract ? 'flex' : 'none' }]} onPress={clearTextInput}><Image style={styles.imgsubtract} source={require("../../assets/subtractIcon.png")} />
+              </Pressable></View>
 
               <View>
                 <Pressable onPress={filterShow} style={styles.imgs} ><Image style={styles.imgFilter} source={require("../../assets/filterIcon.png")} /></Pressable>
@@ -315,6 +314,7 @@ const styles = StyleSheet.create({
     top: -5
 
   },
+  
 
 
 })

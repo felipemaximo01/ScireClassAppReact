@@ -81,7 +81,52 @@ export function ModalFilter({ handleClose }) {
                 
                 <View>
                     <Text style={styles.titlePreco}>Preço</Text>
-                    <InputRange minValue ={0} maxValue={100} onChangeMin={(v)=>console.log} onChangeMax ={(v)=>console.log}/>
+
+
+
+                </View>
+                <GestureHandlerRootView style={styles.interact}>
+                    <View>
+
+                        <RangeSlider min={0} max={10000} step={10}
+                            fromValueOnChange={value => setFromValue(value)}
+                            toValueOnChange={value => setToValue(value)}
+                            initialFromValue={0}
+                            styleSize='small'
+                            inRangeBarColor='#3D5CFF'
+                            outOfRangeBarColor='#B8B8D2'
+                            fromKnobColor='#3D5CFF'
+                            toKnobColor="#3D5CFF"
+                            
+                        />
+                        <View style={styles.precos}><Text style={styles.textopreco}> R${fromValue} - </Text>
+                            <Text style={styles.textopreco}>R${toValue}</Text></View>
+
+                    </View>
+
+                    <View style={styles.distaceview}>
+                        <Text style={styles.titlePreco}>Distância</Text>
+                        <Slider min={0} max={50} step={1}
+                            valueOnChange={value => setValue(value)}
+                            initialValue={0}
+                            styleSize='small'
+                            knobColor='#3D5CFF'
+                            inRangeBarColor='#B8B8D2'
+                            outOfRangeBarColor='#3D5CFF'
+
+                        />
+                        <View style={styles.precos}>
+                            <Text style={styles.textopreco}>{value} Km</Text></View>
+                    </View>
+
+                    <View style={styles.buttonAreaFilter}>
+                    <TouchableOpacity style={[styles.buttonFilter, styles.buttonSaveClear]} onPress={handleClose}>
+                        <Text style={styles.buttonSaveTextClear}>Limpar</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={[styles.buttonFilter, styles.buttonSaveFilter]} onPress={handleClose}>
+                        <Text style={styles.buttonSaveTextFilter}>Aplicar Filtro</Text>
+                    </TouchableOpacity>
                 </View>
 
                 </GestureHandlerRootView>
@@ -97,43 +142,40 @@ const styles = StyleSheet.create({
         flexDirection:"row",
         width:"100%",
         marginTop:60,
-        
-
-        justifyContent:"space-between"
-        
+        justifyContent:"space-around"
     },
     buttonFilter: {
-        flex:1,
         alignItems:"center",
         marginTop:14,
         marginBottom:14,
         padding:8,
-        height:50,
-        margin:10,
-        alignItems:'center',
         justifyContent:'center',
     },
     buttonSaveFilter: {
         backgroundColor: "#3D5CFF",
         borderRadius: 8,
+        width: 236,
+        height: 50,
     
     },
     buttonSaveClear: {
         backgroundColor: "#FFF",
         borderRadius: 8,
-        borderWidth:1,
-    
+        borderWidth:2,
+        borderColor:"#3D5CFF",
+        height: 50,
+        width: 89,
     },
     buttonSaveTextFilter: {
         color: "#FFFFFF",
-        fontFamily: "Poppins-Bold",
-        fontSize: 20,
+        fontFamily: "Poppins-Regular",
+        fontSize: 16,
         
     },
     buttonSaveTextClear: {
-        color: "#000",
-        fontFamily: "Poppins-Bold",
-        fontSize: 20,
+        color: "#3D5CFF",
+        fontFamily: "Poppins-Regular",
+        fontSize: 16,
         
     },
     imgCard: {
@@ -147,15 +189,13 @@ const styles = StyleSheet.create({
         marginLeft: 20
     },
     duracao: {
-
         fontFamily: 'Poppins-Regular',
         color: '#1F1F39',
         marginBottom: 10,
         marginRight: 5,
         padding: 4,
-        backgroundColor: "gray",
+        backgroundColor: "#F4F3FD",
         borderRadius: 10,
-
         borderColor: '#1F1F39',
     },
     duracaoSelecionada: {
@@ -191,22 +231,24 @@ const styles = StyleSheet.create({
         width: "100%"
     },
     titlePreco: {
-        fontFamily: "Poppins-Bold",
+        fontFamily: "Poppins-Regular",
         color: "#1F1F39",
-        margin: 5
+        margin: 5,
+        fontSize:16
     },
     areaCategoria: {
         left: 0
     },
     textCategoria: {
-        fontFamily: "Poppins-Bold",
+        fontFamily: "Poppins-Regular",
         color: "#1F1F39",
-        margin: 5
+        margin: 5,
+        fontSize:16
     },
     textCategorias: {
         fontSize: 16,
         marginRight: 5,
-        backgroundColor: "gray",
+        backgroundColor: "#F4F3FD",
         borderRadius: 10,
         padding: 5,
         marginLeft: 20
@@ -264,7 +306,6 @@ const styles = StyleSheet.create({
         marginBottom: 14,
         padding: 8,
         height: 50,
-        alignItems: 'center',
         justifyContent: 'center',
     },
     buttonSave: {

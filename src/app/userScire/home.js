@@ -162,11 +162,11 @@ export default function Home() {
         {lastCursos?.map((curso, i) => (
           <View key={i} style={styles.lastCourses}>
             <View style={{ flexDirection: "row" }}>
-              <Progress.Circle size={25} progress={0.8} thickness={4} borderWidth={0} color='#707070' fill='none' />
+              <Progress.Circle size={25} progress={0.5/curso.quantidadeAulas} thickness={4} borderWidth={0} color='#707070' fill='none' />
               <Text style={styles.nameLastCourse}>{curso.nome}</Text>
             </View>
             <View style={{ flexDirection: "row", }}>
-              <Text style={styles.numberDoneLastCourse}>40</Text>
+              <Text style={styles.numberDoneLastCourse}>0</Text>
               <Text style={styles.numberClassesLastCourse}>/{curso.quantidadeAulas}</Text>
             </View>
           </View>

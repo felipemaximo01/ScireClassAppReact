@@ -198,6 +198,31 @@ export default function Curso({ cursoId }) {
         })
     }
 
+    const handlerBuyCurso = async () => {
+
+        const localhost = await getLocalhost();
+        const token = await getItem("@token");
+        const usuarioId = await getItem("@id");
+        cursoId = '662e09bf311c630d666e764a';
+        setModalLoadingVisible(true)
+        fetch(`http://${localhost}:8080/scireclass/matricula/save/${usuarioId}/${cursoId}`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }).then(async (response) => {
+            const data = await response.json();
+            setModalLoadingVisible(false)
+            if (response.ok) {
+                setTextResponse("Matricula realizada com sucesso! N° de matricula: " + data.numeroMatricula)
+                setModalOKVisible(true)
+            } else if (data.message !== undefined) {
+                setTextResponse(data.message)
+                setModalBADVisible(true)
+            }
+        })
+    }
+
     return (
         <View onLayout={onLayoutRootView} style={styles.container}>
             <View style={styles.viewImage}>
@@ -224,13 +249,13 @@ export default function Curso({ cursoId }) {
                     ))}
                 </View>
             </ScrollView>
-            <View style={styles.viewButton}>
+            <View style={[styles.viewButton, styles.elevation]}>
                 <TouchableOpacity onPress={handlerFavCurso} style={styles.buttonFav}>{!favoritado ?
                     <Image source={require("../../assets/favoritoIconNot.png")} style={styles.iconButtonFav} />
                     :
                     <Image source={require("../../assets/favoritoIcon.png")} style={styles.iconButtonFav} />}
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonBuy}><Text style={styles.textButtonBuy}>Comprar agora</Text></TouchableOpacity>
+                <TouchableOpacity onPress={handlerBuyCurso} style={styles.buttonBuy}><Text style={styles.textButtonBuy}>Comprar agora</Text></TouchableOpacity>
             </View>
             <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
                 <ModalOK textOK={textResponse} handleClose={() => setModalOKVisible(false)} />
@@ -333,12 +358,15 @@ const styles = StyleSheet.create({
         fontSize: 14
     },
     viewButton: {
+        position: 'relative',
         backgroundColor: "#FFFFFF",
         width: "100%",
         height: 98,
-        position: "relative",
+        padding:12,
         flexDirection: "row",
         justifyContent: 'space-around',
+        borderTopLeftRadius:8,
+        borderTopRightRadius:8
     },
     buttonFav: {
         backgroundColor: "#FFEBF0",
@@ -364,7 +392,11 @@ const styles = StyleSheet.create({
     iconButtonFav: {
         width: 20,
         height: 18
-    }
+    },
+    elevation: {
+        elevation: 15,
+        shadowColor: '#52006A',
+      },
 
 
 })
