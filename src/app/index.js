@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import {Link,Redirect } from 'expo-router'
 import AppIntroSlider from 'react-native-app-intro-slider';
 import useStorage from './hooks/useStorage';
-import 'react-native-gesture-handler'
+
 
 const slides = [
   {

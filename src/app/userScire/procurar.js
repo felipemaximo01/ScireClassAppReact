@@ -13,7 +13,8 @@ export default function Procurar() {
 
   const { getLocalhost } = useLocalhost();
   const [localhost, setLocahost] = useState("");
-
+  const [visibleSubstract, setVisibleSubstract] = useState(false)
+  const [textInputValue, setTextInputValue] = useState('');
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
@@ -23,7 +24,39 @@ export default function Procurar() {
     setModalFilterVisible(true)
   }
 
+  function showClearText(text) {
+    
+    if (text && text.trim().length > 0) {
+      setVisibleSubstract(true);
+      
+    } else {
+      setVisibleSubstract(false);
+      
+    }
+    
+  }
+  const clearTextInput = () => {
+    setTextInputValue('');
+    setVisibleSubstract(false)
+  };
+  const handleInputChange = (text) => {
+    
+    setTextInputValue(text);
 
+    showClearText(textInputValue);
+    updateVisibleSubstract(text);
+   
+    
+    
+  };
+
+  const updateVisibleSubstract = (text) => {
+    if (text && text.trim().length > 0) {
+      setVisibleSubstract(true);
+    } else {
+      setVisibleSubstract(false);
+    }
+  };
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded || fontError) {
       await SplashScreen.hideAsync();
@@ -56,15 +89,15 @@ export default function Procurar() {
                 <Pressable style={styles.imgs} ><Image style={styles.imgSearch} source={require("../../assets/SearchIcon.png")} /></Pressable>
               </View>
               <View>
-                <Pressable style={styles.imgs} ><Image style={styles.imgsubtract} source={require("../../assets/subtractIcon.png")} /></Pressable>
-
+              <Pressable style={styles.imgs} ><Image style={styles.imgsubtract} source={require("../../assets/subtractIcon.png")} /></Pressable>
+                
               </View>
 
               <View>
                 <Pressable onPress={filterShow} style={styles.imgs} ><Image style={styles.imgFilter} source={require("../../assets/filterIcon.png")} /></Pressable>
 
               </View>
-              <TextInput placeholder='O que você proucura ?' style={styles.formInput} />
+              <TextInput placeholder='O que você proucura ?' style={styles.formInput} onChangeText={handleInputChange} value={textInputValue} />
 
             </View>
 
