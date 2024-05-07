@@ -33,6 +33,8 @@ export default function Home() {
 
   const [textResponse, setTextResponse] = useState("")
 
+  const [minutosAssitidos, setMinutosAssistidos] = useState(0)
+
 
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
@@ -128,6 +130,34 @@ export default function Home() {
     lastCursosUser();
   }, [token, id])
 
+  useEffect(() => {
+    async function getMinutosAssitidos() {
+      if (token !== null && id !== null) {
+        setModalLoadingVisible(true)
+        fetch(`http://${localhost}:8080/scireclass/minutosAssistidos/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+          .then((response) => response.json())
+          .then(async (responseJson) => {
+            setModalLoadingVisible(false)
+            if (responseJson.message !== undefined) {
+              setTextResponse(responseJson.message)
+              setModalBADVisible(true)
+            } else {
+              setMinutosAssistidos(responseJson.minutos)
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
+
+    };
+    getMinutosAssitidos();
+  }, [])
+
   return (
     <View onLayout={onLayoutRootView} style={styles.container}>
       <View style={styles.title}>
@@ -143,7 +173,7 @@ export default function Home() {
           <Link style={styles.linkMeusCursos} href="/userScire/meusCursos">Meus cursos</Link>
         </View>
         <View style={styles.progressClass}>
-          <Text style={styles.minDone}>46MIN</Text>
+          <Text style={styles.minDone}>{minutosAssitidos}MIN</Text>
           <Text style={styles.minGoal}>/60min</Text>
         </View>
         <Progress.Bar progress={0.3} width={null} height={6} />
@@ -162,11 +192,11 @@ export default function Home() {
         {lastCursos?.map((curso, i) => (
           <View key={i} style={styles.lastCourses}>
             <View style={{ flexDirection: "row" }}>
-              <Progress.Circle size={25} progress={0.5/curso.quantidadeAulas} thickness={4} borderWidth={0} color='#707070' fill='none' />
+              <Progress.Circle size={25} progress={curso.quantidadeAulasAssistidas/curso.quantidadeAulas} thickness={4} borderWidth={0} color='#707070' fill='none' />
               <Text style={styles.nameLastCourse}>{curso.nome}</Text>
             </View>
             <View style={{ flexDirection: "row", }}>
-              <Text style={styles.numberDoneLastCourse}>0</Text>
+              <Text style={styles.numberDoneLastCourse}>{curso.quantidadeAulasAssistidas}</Text>
               <Text style={styles.numberClassesLastCourse}>/{curso.quantidadeAulas}</Text>
             </View>
           </View>
