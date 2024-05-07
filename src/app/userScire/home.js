@@ -156,7 +156,7 @@ export default function Home() {
 
     };
     getMinutosAssitidos();
-  }, [])
+  }, [token,id])
 
   return (
     <View onLayout={onLayoutRootView} style={styles.container}>

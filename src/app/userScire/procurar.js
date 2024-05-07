@@ -5,6 +5,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Link, useRouter } from 'expo-router';
 import useLocalhost from "../hooks/useLocalhost";
 import { ModalFilter } from '../componentes/modal/modalFilter';
+import { ModalOK } from '../componentes/modal/modalOK';
+import { ModalBAD } from '../componentes/modal/modalBAD';
+import { ModalLoading } from '../componentes/modal/modalLoading';
+import useStorage from "../hooks/useStorage"
 
 SplashScreen.preventAutoHideAsync();
 
@@ -12,51 +16,24 @@ export default function Procurar() {
   const router = useRouter();
 
   const { getLocalhost } = useLocalhost();
-  const [localhost, setLocahost] = useState("");
+  const { getItem } = useStorage();
   const [visibleSubstract, setVisibleSubstract] = useState(false)
   const [textInputValue, setTextInputValue] = useState('');
+  const [modalFilterVisible, setModalFilterVisible] = useState(false)
+  const [imageUrl, setImageUrl] = useState("");
+
+  const [modalBADVisible, setModalBADVisible] = useState(false)
+  const [modalLoadingVisible, setModalLoadingVisible] = useState(false)
+  const [modalOKVisible, setModalOKVisible] = useState(false)
+  const [textResponse, setTextResponse] = useState("")
+
+  const [cursos, setCursos] = useState([])
+
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
   });
-  const [modalFilterVisible, setModalFilterVisible] = useState(false)
-  function filterShow() {
-    setModalFilterVisible(true)
-  }
 
-  function showClearText(text) {
-    
-    if (text && text.trim().length > 0) {
-      setVisibleSubstract(true);
-      
-    } else {
-      setVisibleSubstract(false);
-      
-    }
-    
-  }
-  const clearTextInput = () => {
-    setTextInputValue('');
-    setVisibleSubstract(false)
-  };
-  const handleInputChange = (text) => {
-    
-    setTextInputValue(text);
-
-    showClearText(textInputValue);
-    updateVisibleSubstract(text);
-   
-    
-    
-  };
-
-  const updateVisibleSubstract = (text) => {
-    if (text && text.trim().length > 0) {
-      setVisibleSubstract(true);
-    } else {
-      setVisibleSubstract(false);
-    }
-  };
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded || fontError) {
       await SplashScreen.hideAsync();
@@ -70,14 +47,73 @@ export default function Procurar() {
   useEffect(() => {
     async function loadLocalhost() {
       const host = await getLocalhost();
-      setLocahost(host);
+      setImageUrl(host);
     }
     loadLocalhost()
+  }, [])
+
+  function filterShow() {
+    setModalFilterVisible(true)
+  }
+
+  function showClearText(text) {
+    if (text && text.trim().length > 0) {
+      setVisibleSubstract(true);
+    } else {
+      setVisibleSubstract(false);
+    }
+  }
+
+  const clearTextInput = () => {
+    setTextInputValue('');
+    setVisibleSubstract(false)
+  };
+
+  const handleInputChange = (text) => {
+    setTextInputValue(text);
+    showClearText(textInputValue);
+    updateVisibleSubstract(text);
+  };
+
+  const updateVisibleSubstract = (text) => {
+    if (text && text.trim().length > 0) {
+      setVisibleSubstract(true);
+    } else {
+      setVisibleSubstract(false);
+    }
+  };
+
+  useEffect(() => {
+    async function getCursos() {
+      const localhost = await getLocalhost();
+      const token = await getItem("@token");
+
+      setModalLoadingVisible(true)
+
+      fetch(`http://${localhost}:8080/scireclass/curso`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(async (response) => {
+        const data = await response.json();
+        setModalLoadingVisible(false)
+        if (response.ok) {
+          setCursos(data)
+        } else {
+          setTextResponse(data.message)
+          setModalBADVisible(true)
+        }
+      })
+    }
+    getCursos();
   }, [])
 
   const buscar = async () => {
 
   }
+
+
   return (
     <ScrollView>
       <View onLayout={onLayoutRootView} style={styles.form}>
@@ -89,22 +125,17 @@ export default function Procurar() {
                 <Pressable style={styles.imgs} ><Image style={styles.imgSearch} source={require("../../assets/SearchIcon.png")} /></Pressable>
               </View>
               <View >
-              <Pressable style={[styles.imgs, { display: visibleSubstract ? 'flex' : 'none' }]} onPress={clearTextInput}><Image style={styles.imgsubtract} source={require("../../assets/subtractIcon.png")} />
-              </Pressable></View>
-
+                <Pressable style={[styles.imgs, { display: visibleSubstract ? 'flex' : 'none' }]} onPress={clearTextInput}><Image style={styles.imgsubtract} source={require("../../assets/subtractIcon.png")} />
+                </Pressable></View>
               <View>
                 <Pressable onPress={filterShow} style={styles.imgs} ><Image style={styles.imgFilter} source={require("../../assets/filterIcon.png")} /></Pressable>
-
               </View>
               <TextInput placeholder='O que você proucura ?' style={styles.formInput} onChangeText={handleInputChange} value={textInputValue} />
-
             </View>
-
             <Text style={styles.cardsText}>Descubra por novos cursos!</Text></View>
           <View style={styles.filtro}>
             <Pressable >
               <Text style={styles.textButton}>Novo</Text>
-
             </Pressable>
             <Pressable >
               <Text style={styles.textButton}>Popular</Text>
@@ -113,27 +144,30 @@ export default function Procurar() {
               <Text style={styles.textButton}>Mais vendidos</Text>
             </Pressable >
           </View>
-
-          <View style={[styles.card, styles.elevation]} >
-            <Image style={styles.imgFavNot} source={require("../../assets/favoritoIconNot.png")}></Image>
-            <Image style={styles.imgCard} source={require("../../assets/blankImage.png")} />
-
-            <Text style={styles.cardTextTitle}>Nome do curso</Text>
-            <Text style={styles.cardText}>Nome do professor</Text>
-            <Text style={styles.cardTextPrice}>R$0,00</Text>
-            <View style={styles.horas}>
-              <Text style={styles.horasText} >0 horas</Text>
+          {cursos?.map((curso, i) => (
+            <View key={i} style={[styles.card, styles.elevation]} >
+              <Image style={styles.imgFavNot} source={require("../../assets/favoritoIconNot.png")}></Image>
+              <Image style={styles.imgCard} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
+              <Text style={styles.cardTextTitle}>{curso.nome}</Text>
+              <Text style={styles.cardText}>{curso.nomeCriador}</Text>
+              <Text style={styles.cardTextPrice}>R${curso.valor}</Text>
+              <View style={styles.horas}>
+                <Text style={styles.horasText} >{curso.minutosTotalCurso} min</Text>
+              </View>
             </View>
-
-
-          </View>
-
-
-
-
+          ))}
         </View>
         <Modal visible={modalFilterVisible} animationType='slide' transparent={true}>
           <ModalFilter handleClose={() => setModalFilterVisible(false)} />
+        </Modal>
+        <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
+          <ModalOK textOK={textResponse} handleClose={() => setModalOKVisible(false)} />
+        </Modal>
+        <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
+          <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)} />
+        </Modal>
+        <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
+          <ModalLoading />
         </Modal>
       </View>
     </ScrollView>
@@ -314,7 +348,7 @@ const styles = StyleSheet.create({
     top: -5
 
   },
-  
+
 
 
 })

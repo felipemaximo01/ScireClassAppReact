@@ -58,8 +58,6 @@ export default function Curso({ cursoId }) {
         async function cursoById() {
             const localhost = await getLocalhost();
             const token = await getItem("@token");
-
-            cursoId = '662e09bf311c630d666e764a';
             setModalLoadingVisible(true)
             fetch(`http://${localhost}:8080/scireclass/curso/findid/${cursoId}`, {
                 headers: {
@@ -87,8 +85,6 @@ export default function Curso({ cursoId }) {
         async function aulaByCursoId() {
             const localhost = await getLocalhost();
             const token = await getItem("@token");
-
-            cursoId = '662e09bf311c630d666e764a';
             setModalLoadingVisible(true)
             fetch(`http://${localhost}:8080/scireclass/aula/getlistaulas/${cursoId}`, {
                 headers: {
@@ -146,7 +142,6 @@ export default function Curso({ cursoId }) {
             const localhost = await getLocalhost();
             const token = await getItem("@token");
             const usuarioId = await getItem("@id");
-            cursoId = '662e09bf311c630d666e764a';
             fetch(`http://${localhost}:8080/scireclass/usuario/cursoFavoritado/${usuarioId}/${cursoId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -171,7 +166,6 @@ export default function Curso({ cursoId }) {
         const localhost = await getLocalhost();
         const token = await getItem("@token");
         const usuarioId = await getItem("@id");
-        cursoId = '662e09bf311c630d666e764a';
         setModalLoadingVisible(true)
         fetch(`http://${localhost}:8080/scireclass/usuario/favorita/${usuarioId}/${cursoId}`, {
             method: "PUT",
@@ -203,7 +197,6 @@ export default function Curso({ cursoId }) {
         const localhost = await getLocalhost();
         const token = await getItem("@token");
         const usuarioId = await getItem("@id");
-        cursoId = '662e09bf311c630d666e764a';
         setModalLoadingVisible(true)
         fetch(`http://${localhost}:8080/scireclass/matricula/save/${usuarioId}/${cursoId}`, {
             method: "POST",
