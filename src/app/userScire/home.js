@@ -176,7 +176,7 @@ export default function Home() {
           <Text style={styles.minDone}>{minutosAssitidos}MIN</Text>
           <Text style={styles.minGoal}>/60min</Text>
         </View>
-        <Progress.Bar progress={0.3} width={null} height={6} />
+        <Progress.Bar progress={minutosAssitidos/60} width={null} height={6} />
       </View>
       <View style={styles.card}>
         <Text style={styles.cardText}>Descubra por novos cursos!</Text>
