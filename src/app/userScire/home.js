@@ -36,7 +36,7 @@ export default function Home() {
   const [minutosAssitidos, setMinutosAssistidos] = useState(0)
 
 
-  const [fontsLoaded, fontError] = useFonts({
+  const [fontsLoaded, fontError] = useFonfts({
     'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
   });
@@ -173,10 +173,10 @@ export default function Home() {
           <Link style={styles.linkMeusCursos} href="/userScire/meusCursos">Meus cursos</Link>
         </View>
         <View style={styles.progressClass}>
-          <Text style={styles.minDone}>{minutosAssitidos}MIN</Text>
+          <Text style={styles.minDone}>{0}MIN</Text>
           <Text style={styles.minGoal}>/60min</Text>
         </View>
-        <Progress.Bar progress={minutosAssitidos/60} width={null} height={6} />
+        <Progress.Bar progress={0/60} width={null} height={6} />
       </View>
       <View style={styles.card}>
         <Text style={styles.cardText}>Descubra por novos cursos!</Text>

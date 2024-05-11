@@ -110,9 +110,11 @@ export default function Procurar() {
   }, [])
 
   const buscar = async () => {
-
+    console.log("curso")
   }
-
+  const favoritar = async () => {
+    console.log("fav")
+  }
 
   return (
     <ScrollView>
@@ -145,17 +147,19 @@ export default function Procurar() {
             </Pressable >
           </View>
           {cursos?.map((curso, i) => (
-            <View key={i} style={[styles.card, styles.elevation]} >
-              <Image style={styles.imgFavNot} source={require("../../assets/favoritoIconNot.png")}></Image>
-              <Image style={styles.imgCard} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
+          <Pressable key={i} onPress={buscar} style={[styles.card, styles.elevation]}>
+          <View   >
+          <Pressable onPress={favoritar}><Image style={styles.imgFavNot} source={require("../../assets/favoritoIconNot.png")}></Image></Pressable>
+              <Image  style={styles.imgCard} source={ require("../../assets/blankImage.png")} />
               <Text style={styles.cardTextTitle}>{curso.nome}</Text>
               <Text style={styles.cardText}>{curso.nomeCriador}</Text>
               <Text style={styles.cardTextPrice}>R${curso.valor}</Text>
               <View style={styles.horas}>
                 <Text style={styles.horasText} >{curso.minutosTotalCurso} min</Text>
               </View>
-            </View>
-          ))}
+          </View></Pressable>))}
+         
+         
         </View>
         <Modal visible={modalFilterVisible} animationType='slide' transparent={true}>
           <ModalFilter handleClose={() => setModalFilterVisible(false)} />
@@ -183,7 +187,7 @@ const styles = StyleSheet.create({
   },
   horas: {
     position: "absolute",
-    right: 110,
+    right: 100,
     bottom: 6,
     width: 60,
     borderRadius: 30,
@@ -205,7 +209,7 @@ const styles = StyleSheet.create({
     width: 27,
     height: 25,
     position: 'absolute',
-    margin: 15,
+    margin: 0,
     right: 0,
     zIndex: 3
   },
@@ -296,8 +300,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     position: "absolute",
     padding: 8,
-    marginLeft: 130,
-    marginTop: 70,
+    marginLeft: 100,
+    marginTop: 40,
     zIndex: 1
   },
   card: {
@@ -306,6 +310,7 @@ const styles = StyleSheet.create({
     height: 110,
     marginTop: 10,
     borderRadius: 10,
+    position:'relative',
     padding: 20
   },
   elevation: {
@@ -317,9 +322,9 @@ const styles = StyleSheet.create({
     color: "#1F1F39",
     fontSize: 15,
     position: "absolute",
-    padding: 8,
-    marginLeft: 130,
-    marginTop: 5,
+    padding: 5,
+    marginLeft: 100,
+    marginTop: -10,
     zIndex: 1
   },
   cardsText: {
@@ -338,8 +343,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     textAlign: "center",
     padding: 8,
-    marginLeft: 130,
-    marginTop: 30,
+    marginLeft: 100,
+    marginTop: 15,
 
   },
   imgCard: {
