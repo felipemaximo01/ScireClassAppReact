@@ -3,45 +3,129 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, Pressable, Image, 
 import { useFonts } from 'expo-font';
 import { Link, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import useStorage from "../hooks/useStorage"
+import useLocalhost from "../hooks/useLocalhost"
+import { ModalOK } from '../componentes/modal/modalOK';
+import { ModalBAD } from '../componentes/modal/modalBAD';
+import { ModalLoading } from '../componentes/modal/modalLoading';
+import { useNavigation } from '@react-navigation/native';
 
 import * as Progress from 'react-native-progress';
 SplashScreen.preventAutoHideAsync();
 
 export default function MeusCursos() {
-    const [cursos,setCursos]=useState([]);
-    
-    
-    
+    const { getItem } = useStorage();
+    const { getLocalhost } = useLocalhost();
+    const navigation = useNavigation();
 
+    const [cursos, setCursos] = useState([]);
 
-    // Função para obter uma cor com base no índice
-    
+    const [modalBADVisible, setModalBADVisible] = useState(false)
+    const [modalLoadingVisible, setModalLoadingVisible] = useState(false)
+    const [modalOKVisible, setModalOKVisible] = useState(false)
+
+    const [textResponse, setTextResponse] = useState("")
+
+    const [minutosAssitidos, setMinutosAssistidos] = useState(0)
+
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
     });
+
     const onLayoutRootView = useCallback(async () => {
         if (fontsLoaded || fontError) {
-          await SplashScreen.hideAsync();
+            await SplashScreen.hideAsync();
         }
-      }, [fontsLoaded, fontError]);
-    
-      if (!fontsLoaded && !fontError) {
+    }, [fontsLoaded, fontError]);
+
+    if (!fontsLoaded && !fontError) {
         return null;
-      }
+    }
 
-
-      function carregarNome(nome){
-        if(nome!=null && nome!=undefined){
-            if(nome.length>17){
-                var quebraString =nome.substr(0,12)+"..."
-                return quebraString;
+    function carregarNome(nome) {
+        if (nome != null && nome != undefined) {
+            if (nome.length > 17) {
+                return nome.substr(0, 12) + "...";
             }
             return nome
         }
         return "";
+    }
 
+    useEffect(() => {
+        async function getCursosMatriculados() {
+            const localhost = await getLocalhost();
+            const token = await getItem("@token");
+            const id = await getItem("@id");
+
+            setModalLoadingVisible(true)
+            fetch(`http://${localhost}:8080/scireclass/matricula/curso/all/${id}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            })
+              .then(async (response) => {
+                const data = await response.json();
+                setModalLoadingVisible(false)
+                if (response.ok) {
+                    setCursos(data);
+                } else if (data.message !== undefined) {
+                    setTextResponse(data.message)
+                    setModalBADVisible(true)
+                }
+              })
+              .catch((error) => {
+                console.error('Error:', error);
+              });
+    
+        };
+        getCursosMatriculados();
+      }, [])
+
+      useEffect(() => {
+        async function getMinutosAssitidos() {
+            const localhost = await getLocalhost();
+            const token = await getItem("@token");
+            const id = await getItem("@id");
+            setModalLoadingVisible(true)
+            fetch(`http://${localhost}:8080/scireclass/minutosAssistidos/${id}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            })
+              .then((response) => response.json())
+              .then(async (responseJson) => {
+                setModalLoadingVisible(false)
+                if (responseJson.message !== undefined) {
+                  setTextResponse(responseJson.message)
+                  setModalBADVisible(true)
+                } else {
+                  setMinutosAssistidos(responseJson.minutos)
+                }
+              })
+              .catch((error) => {
+                console.error('Error:', error);
+              });
+        };
+        getMinutosAssitidos();
+      }, [])
+
+      const goToCurso = async (cursoId) => {
+
+        navigation.navigate('curso', {cursoId: cursoId})
       }
+    
+      function carregarQuantidadeAulas(quantidadeAulas) {
+        if (quantidadeAulas != null && quantidadeAulas != undefined) {
+            if (quantidadeAulas <= 0) {
+                return 1
+            }
+            return quantidadeAulas
+        }
+        return 1;
+    }
+    
     return (
         <View onLayout={onLayoutRootView} style={styles.container}>
             <View style={styles.titlepage}>
@@ -52,38 +136,43 @@ export default function MeusCursos() {
             <View style={[styles.titleContent, styles.elevation]}>
                 <View style={styles.textTitleContent}>
                     <Text style={styles.textBase}>Aprendi hoje</Text>
-
                 </View>
                 <View style={styles.progressClass}>
                     <Text style={styles.minDone}>{0}MIN</Text>
                     <Text style={styles.minGoal}>/60min</Text>
                 </View>
-                <Progress.Bar progress={0 / 60} width={null} height={6} />
+                <Progress.Bar progress={minutosAssitidos/60} width={null} height={6} />
             </View>
             <ScrollView>
                 <View style={styles.cursosstyleconteiner}>
-                    <View style={[styles.cursosstyle, styles.elevation]}>
-                        <Text style={styles.cursotitulo}>{carregarNome("Titulo do curso")} </Text>
+                    {cursos?.map((curso, i) => (
+                    <View key={i} style={[styles.cursosstyle, styles.elevation]}>
+                        <Text style={styles.cursotitulo}>{carregarNome(curso.nome)} </Text>
                         <View style={styles.progressbarContainer}>
-                            <Progress.Bar progress={0 / 60} width={null} height={6} />
+                            <Progress.Bar progress={curso.quantidadeAulasAssistidas/carregarQuantidadeAulas(curso.quantidadeAulas)} width={null} height={6} />
                         </View>
-
                         <View style={styles.textConteiner}>
                             <Text style={styles.textcard}>Completado</Text>
-                            <Text style={styles.textcardprogress}>0/40</Text>
+                            <Text style={styles.textcardprogress}>{curso.quantidadeAulasAssistidas}/{curso.quantidadeAulas}</Text>
                             <View style={styles.circulo}>
-                                <Pressable style={styles.playContainer}>
+                                <Pressable onPress={() => goToCurso(curso.id)} style={styles.playContainer}>
                                     <Image style={styles.imgPlay} source={require("../../assets/play.png")} />
-
                                 </Pressable>
                             </View>
-
                         </View>
-
                     </View>
+                    ))}
                 </View>
-
             </ScrollView>
+            <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
+                <ModalOK textOK={textResponse} handleClose={() => setModalOKVisible(false)} />
+            </Modal>
+            <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
+                <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)} />
+            </Modal>
+            <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
+                <ModalLoading />
+            </Modal>
         </View>
     )
 }
@@ -95,7 +184,6 @@ const styles = StyleSheet.create({
     playContainer: {
         alignItems: "center",
         justifyContent: "center"
-
     },
     circulo: {
         position: "absolute",
@@ -127,22 +215,22 @@ const styles = StyleSheet.create({
         fontSize: 16
     },
     cursosstyleconteiner: {
-      
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
         padding: 20,
+        width:'100%',
+        height:'100%'
     },
 
     cursosstyle: {
         borderRadius: 25,
         paddingTop: 25,
         padding: 10,
-        height: 182,
-        width: 160,
+        height: 183,
+        width: 161,
         margin: 10,
         backgroundColor: "white",
-        
     },
     elevation: {
         elevation: 20
@@ -150,17 +238,14 @@ const styles = StyleSheet.create({
     titlepagetext: {
         fontFamily: 'Poppins-Bold',
         fontSize: 20,
-
-      
     },
     titlepage: {
         width: "100%",
         flexDirection: 'row',
         justifyContent: 'center',
-        alignItems:"center",
-        marginTop:"5%",
+        alignItems: "center",
+        marginTop: "5%",
         padding: 10,
-        
     },
     container: {
         flex: 1,
@@ -191,11 +276,11 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: "#1F1F39",
         marginRight: 4
-      },
-      minGoal: {
+    },
+    minGoal: {
         fontFamily: "Poppins-Regular",
         fontSize: 10,
         color: "#858597",
         marginTop: 8
-      },
+    },
 })

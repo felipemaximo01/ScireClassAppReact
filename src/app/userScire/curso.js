@@ -7,10 +7,15 @@ import useLocalhost from "../hooks/useLocalhost"
 import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
+import { useRoute } from '@react-navigation/native';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function Curso({ cursoId }) {
+export default function Curso() {
+
+    const route = useRoute();
+
+    const {cursoId} = route.params;
 
     const [curso, setCurso] = useState([]);
 
@@ -79,7 +84,7 @@ export default function Curso({ cursoId }) {
                 });
         }
         cursoById();
-    }, [])
+    }, [cursoId])
 
     useEffect(() => {
         async function aulaByCursoId() {
@@ -106,14 +111,12 @@ export default function Curso({ cursoId }) {
                 });
         }
         aulaByCursoId();
-    }, [])
+    }, [cursoId])
 
     useEffect(() => {
         async function imagemByCursoId() {
             const localhost = await getLocalhost();
             const token = await getItem("@token");
-
-            cursoId = '662e09bf311c630d666e764a';
             setModalLoadingVisible(true)
             fetch(`http://${localhost}:8080/scireclass/imagem/curso/${cursoId}`, {
                 headers: {
@@ -135,7 +138,7 @@ export default function Curso({ cursoId }) {
                 });
         }
         imagemByCursoId();
-    }, [])
+    }, [cursoId])
 
     useEffect(() => {
         const favoritado = async () => {
@@ -159,7 +162,7 @@ export default function Curso({ cursoId }) {
             })
         };
         favoritado();
-    }, [])
+    }, [cursoId])
 
     const handlerFavCurso = async () => {
 

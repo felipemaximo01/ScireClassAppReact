@@ -94,7 +94,7 @@ export default function cadastrarCurso() {
 
   const handleCadastraCurso = async () => {
 
-    const id = await getItem("@id");
+    
 
     if (!nome.trim() || !descricao.trim() || !link.trim() || !telefone.trim() || !vagas.trim() || !categoriaId.trim()) {
       setTextResponse("Todos os campos precisam ser preenchidos!")
@@ -146,6 +146,8 @@ export default function cadastrarCurso() {
     }
 
     const token = await getItem("@token")
+    const localhost = await getLocalhost();
+    const id = await getItem("@id");
     fetch(`http://${localhost}:8080/scireclass/curso/save/${id}`, {
       method: "post",
       body: JSON.stringify(cadastroCursoDTO),

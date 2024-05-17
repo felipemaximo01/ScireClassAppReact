@@ -8,6 +8,8 @@ import useLocalhost from "../hooks/useLocalhost"
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import * as Progress from 'react-native-progress';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 
 SplashScreen.preventAutoHideAsync();
@@ -36,7 +38,7 @@ export default function Home() {
   const [minutosAssitidos, setMinutosAssistidos] = useState(0)
 
 
-  const [fontsLoaded, fontError] = useFonfts({
+  const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
   });
@@ -50,7 +52,7 @@ export default function Home() {
   if (!fontsLoaded && !fontError) {
     return null;
   }
-
+  
   useEffect(() => {
     async function jaLogado() {
       const getToken = await getItem("@token")
@@ -158,6 +160,16 @@ export default function Home() {
     getMinutosAssitidos();
   }, [token,id])
 
+  function carregarQuantidadeAulas(quantidadeAulas) {
+    if (quantidadeAulas != null && quantidadeAulas != undefined) {
+        if (quantidadeAulas <= 0) {
+            return 1
+        }
+        return quantidadeAulas
+    }
+    return 1;
+}
+
   return (
     <View onLayout={onLayoutRootView} style={styles.container}>
       <View style={styles.title}>
@@ -173,10 +185,10 @@ export default function Home() {
           <Link style={styles.linkMeusCursos} href="/userScire/meusCursos">Meus cursos</Link>
         </View>
         <View style={styles.progressClass}>
-          <Text style={styles.minDone}>{0}MIN</Text>
+          <Text style={styles.minDone}>{minutosAssitidos}MIN</Text>
           <Text style={styles.minGoal}>/60min</Text>
         </View>
-        <Progress.Bar progress={0/60} width={null} height={6} />
+        <Progress.Bar progress={minutosAssitidos/60} width={null} height={6} />
       </View>
       <View style={styles.card}>
         <Text style={styles.cardText}>Descubra por novos cursos!</Text>
@@ -192,7 +204,7 @@ export default function Home() {
         {lastCursos?.map((curso, i) => (
           <View key={i} style={styles.lastCourses}>
             <View style={{ flexDirection: "row" }}>
-              <Progress.Circle size={25} progress={curso.quantidadeAulasAssistidas/curso.quantidadeAulas} thickness={4} borderWidth={0} color='#707070' fill='none' />
+              <Progress.Circle size={25} progress={curso.quantidadeAulasAssistidas/carregarQuantidadeAulas(curso.quantidadeAulas)} thickness={4} borderWidth={0} color='#707070' fill='none' />
               <Text style={styles.nameLastCourse}>{curso.nome}</Text>
             </View>
             <View style={{ flexDirection: "row", }}>

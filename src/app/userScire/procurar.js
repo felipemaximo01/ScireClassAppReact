@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Pressable, Image, Modal, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Pressable, Image, Modal, ScrollView } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { Link, useRouter } from 'expo-router';
 import useLocalhost from "../hooks/useLocalhost";
 import { ModalFilter } from '../componentes/modal/modalFilter';
 import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import useStorage from "../hooks/useStorage"
+import { useNavigation } from '@react-navigation/native';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Procurar() {
-  const router = useRouter();
+  const navigation = useNavigation();
 
   const { getLocalhost } = useLocalhost();
   const { getItem } = useStorage();
@@ -109,8 +109,8 @@ export default function Procurar() {
     getCursos();
   }, [])
 
-  const buscar = async () => {
-    console.log("curso")
+  const buscar = async (cursoId) => {
+    navigation.navigate('curso', {cursoId: cursoId})
   }
   const favoritar = async () => {
     console.log("fav")
@@ -147,10 +147,10 @@ export default function Procurar() {
             </Pressable >
           </View>
           {cursos?.map((curso, i) => (
-          <Pressable key={i} onPress={buscar} style={[styles.card, styles.elevation]}>
+          <Pressable key={i} onPress={() => buscar(curso.id)} style={[styles.card, styles.elevation]}>
           <View   >
           <Pressable onPress={favoritar}><Image style={styles.imgFavNot} source={require("../../assets/favoritoIconNot.png")}></Image></Pressable>
-              <Image  style={styles.imgCard} source={ require("../../assets/blankImage.png")} />
+              <Image  style={styles.imgCard} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
               <Text style={styles.cardTextTitle}>{curso.nome}</Text>
               <Text style={styles.cardText}>{curso.nomeCriador}</Text>
               <Text style={styles.cardTextPrice}>R${curso.valor}</Text>
@@ -249,10 +249,10 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontFamily: 'Poppins-Bold',
-    fontSize: 25,
+    fontSize: 20,
     textAlign: 'center',
     color: "#1F1F39",
-    marginTop: 30
+    marginTop: "5%"
   },
   form: {
     flex: 1,
