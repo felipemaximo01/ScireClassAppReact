@@ -1,14 +1,12 @@
 import { useCallback, useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Pressable, Image, Modal } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Image, Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { useRouter, Link } from 'expo-router'
 import useStorage from "../hooks/useStorage"
 import useLocalhost from "../hooks/useLocalhost"
 import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
-import * as Progress from 'react-native-progress';
 import { useFocusEffect,useNavigation } from '@react-navigation/native';
 
 
@@ -18,7 +16,7 @@ SplashScreen.preventAutoHideAsync();
 export default function Favoritos() {
   const navigation = useNavigation();
 
-  const [cursoFav, setCursofav] = useState([]);
+  const [cursoFav, setCursoFav] = useState([]);
 
   const { getItem } = useStorage();
   const { getLocalhost } = useLocalhost();
@@ -68,7 +66,7 @@ export default function Favoritos() {
         const data = await response.json();
         setModalLoadingVisible(false)
         if (response.ok) {
-          setCursofav(data)
+          setCursoFav(data)
         } else if (data.message !== undefined) {
           setTextResponse(data.message)
           setModalBADVisible(true)
