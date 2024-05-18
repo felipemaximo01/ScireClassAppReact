@@ -97,7 +97,10 @@ export default function Favoritos() {
         setTextResponse(data.message)
         setModalBADVisible(true)
       }
-    })
+    }).catch((error) => {
+      console.error('Error:', error);
+      setModalLoadingVisible(false)
+    });
   }
 
   const buscar = async (cursoId) => {

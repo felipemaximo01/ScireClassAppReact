@@ -1,16 +1,32 @@
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image } from "react-native";
-import { useCallback, useEffect, useState } from 'react';
-
+import { useEffect, useState, useCallback} from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import RangeSlider, { Slider } from 'react-native-range-slider-expo';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated'
+import useStorage from "../../hooks/useStorage"
+import useLocalhost from "../../hooks/useLocalhost";
 
-export function ModalFilter({ handleClose }) {
-    const [categoriasSelecionadas, setCategoriasSelecionadas] = useState([styles.textCategorias]);
-    const [fromValue, setFromValue] = useState(0);
-    const [toValue, setToValue] = useState(1000);
-    const [value, setValue] = useState(0);
-    const [duracaoSelecionada, setDuracaoSelecionada] = useState('');
+export function ModalFilter({ handleClose,onApplyFilters,initialFilters }) {
+
+    const { getLocalhost } = useLocalhost();
+    const { getItem } = useStorage();
+
+    const [categoriasSelecionadas, setCategoriasSelecionadas] = useState(initialFilters.categorias || []);
+    const [fromValue, setFromValue] = useState(initialFilters.precoMin);
+    const [toValue, setToValue] = useState(initialFilters.precoMax);
+    const [value, setValue] = useState(initialFilters.distancia);
+    const [duracaoSelecionada, setDuracaoSelecionada] = useState(initialFilters.duracao);
+
+    useEffect(() => {
+        setCategoriasSelecionadas(initialFilters.categorias || []);
+        setFromValue(initialFilters.precoMin);
+        setToValue(initialFilters.precoMax);
+        setValue(initialFilters.distancia);
+        setDuracaoSelecionada(initialFilters.duracao);
+    }, [initialFilters]);
+
+    const [categorias, setCategorias] = useState([])
 
     function toggleCategoria(categoria) {
         if (categoriasSelecionadas.includes(categoria)) {
@@ -29,140 +45,171 @@ export function ModalFilter({ handleClose }) {
         return categoriasSelecionadas.includes(categoria);
     }
 
+    function aplicarFiltro() {
+        onApplyFilters({
+            categorias: categoriasSelecionadas,
+            precoMin:  fromValue, 
+            precoMax: toValue,
+            duracao: duracaoSelecionada,
+            distancia: value,
+        });
+        handleClose();
+    }
+
+    function limparFiltro() {
+        setCategoriasSelecionadas([]);
+        setFromValue(0);
+        setToValue(1000);
+        setValue(0);
+        setDuracaoSelecionada('');
+        onApplyFilters({
+            categorias: [],
+            precoMin: 0, 
+            precoMax: 1000,
+            duracao: '',
+            distancia: 0,
+        });
+        handleClose();
+    }
+
+    async function getCategorias() {
+        const localhost = await getLocalhost();
+        const token = await getItem("@token")
+        fetch(`http://${localhost}:8080/scireclass/categoria`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+        ).then(async (response) => {
+          const data = await response.json();
+          if (response.ok) {
+            setCategorias(data);
+          } else {
+            setTextResponse(data.message)
+            setModalBADVisible(true)
+          }
+        }).catch((error) => {
+          console.log(error);
+        })
+      }
+
+      useFocusEffect(
+        useCallback(() => {
+          getCategorias();
+        }, [])
+      )
 
     return (
-
         <View style={styles.container}>
             <View style={styles.content}>
                 <Pressable onPress={handleClose} style={styles.imgs} ><Image style={styles.imgCard} source={require("../../../assets/close.png")} /></Pressable>
                 <Text style={styles.title}>Filtro de pesquisa</Text>
                 <View style={styles.areaCategoria}><Text style={styles.textCategoria}>Categorias</Text></View>
-
                 <View style={styles.categorias}>
-
-                    <Pressable onPress={() => toggleCategoria('Desing')}>
-                        <Text style={[styles.textCategorias, isCategoriaSelecionada('Desing') && styles.textCategoriasSelecionada]}>
-                            Desing
+                    {categorias?.map((categoria, i) => (
+                    <Pressable key={i} onPress={() => toggleCategoria(categoria.id)}>
+                        <Text style={[styles.textCategorias, isCategoriaSelecionada(categoria.id) && styles.textCategoriasSelecionada]}>
+                            {categoria.nome}
                         </Text>
                     </Pressable>
-                    <Pressable onPress={() => toggleCategoria('Pintura')}>
-                        <Text style={[styles.textCategorias, isCategoriaSelecionada('Pintura') && styles.textCategoriasSelecionada]}>
-                            Pintura
-                        </Text>
-                    </Pressable>
-                    {/* Adicione mais Pressables para outras categorias conforme necessário */}
+                    ))}
                 </View>
-
                 <View style={styles.viewDuracao}>
                     <Text style={styles.titlePreco}>Duração</Text>
                     <View style={styles.alinhamento}>
-                        <Pressable onPress={() => selecionarDuracao('3-8 horas')}>
-                            <Text style={[styles.duracao, duracaoSelecionada === '3-8 horas' && styles.duracaoSelecionada]}>
+                        <Pressable onPress={() => selecionarDuracao('3-8')}>
+                            <Text style={[styles.duracao, duracaoSelecionada === '3-8' && styles.duracaoSelecionada]}>
                                 3-8 horas
                             </Text>
                         </Pressable>
-                        <Pressable onPress={() => selecionarDuracao('8-14 horas')}>
-                            <Text style={[styles.duracao, duracaoSelecionada === '8-14 horas' && styles.duracaoSelecionada]}>
+                        <Pressable onPress={() => selecionarDuracao('8-14')}>
+                            <Text style={[styles.duracao, duracaoSelecionada === '8-14' && styles.duracaoSelecionada]}>
                                 8-14 horas
                             </Text>
                         </Pressable>
-                        <Pressable onPress={() => selecionarDuracao('14-20 horas')}>
-                            <Text style={[styles.duracao, duracaoSelecionada === '14-20 horas' && styles.duracaoSelecionada]}>
+                        <Pressable onPress={() => selecionarDuracao('14-20')}>
+                            <Text style={[styles.duracao, duracaoSelecionada === '14-20' && styles.duracaoSelecionada]}>
                                 14-20 horas
                             </Text>
                         </Pressable>
-                        <Pressable onPress={() => selecionarDuracao('20-24 horas')}>
-                            <Text style={[styles.duracao, duracaoSelecionada === '20-24 horas' && styles.duracaoSelecionada]}>
+                        <Pressable onPress={() => selecionarDuracao('20-24')}>
+                            <Text style={[styles.duracao, duracaoSelecionada === '20-24' && styles.duracaoSelecionada]}>
                                 20-24 horas
                             </Text>
                         </Pressable>
                     </View>
                 </View>
-                
                 <View>
                     <Text style={styles.titlePreco}>Preço</Text>
-
-
-
                 </View>
                 <GestureHandlerRootView style={styles.interact}>
                     <View>
-
-                        <RangeSlider min={0} max={10000} step={10}
+                        <RangeSlider min={0} max={1000} step={10}
                             fromValueOnChange={value => setFromValue(value)}
                             toValueOnChange={value => setToValue(value)}
-                            initialFromValue={0}
+                            initialFromValue={fromValue}
+                            initialToValue={toValue}
                             styleSize='small'
                             inRangeBarColor='#3D5CFF'
                             outOfRangeBarColor='#B8B8D2'
                             fromKnobColor='#3D5CFF'
                             toKnobColor="#3D5CFF"
-                            
                         />
                         <View style={styles.precos}><Text style={styles.textopreco}> R${fromValue} - </Text>
                             <Text style={styles.textopreco}>R${toValue}</Text></View>
-
                     </View>
-
                     <View style={styles.distaceview}>
                         <Text style={styles.titlePreco}>Distância</Text>
                         <Slider min={0} max={50} step={1}
                             valueOnChange={value => setValue(value)}
-                            initialValue={0}
+                            initialValue={value}
                             styleSize='small'
                             knobColor='#3D5CFF'
                             inRangeBarColor='#B8B8D2'
                             outOfRangeBarColor='#3D5CFF'
-
                         />
                         <View style={styles.precos}>
                             <Text style={styles.textopreco}>{value} Km</Text></View>
                     </View>
-
                     <View style={styles.buttonAreaFilter}>
-                    <TouchableOpacity style={[styles.buttonFilter, styles.buttonSaveClear]} onPress={handleClose}>
-                        <Text style={styles.buttonSaveTextClear}>Limpar</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={[styles.buttonFilter, styles.buttonSaveFilter]} onPress={handleClose}>
-                        <Text style={styles.buttonSaveTextFilter}>Aplicar Filtro</Text>
-                    </TouchableOpacity>
-                </View>
-
+                        <TouchableOpacity style={[styles.buttonFilter, styles.buttonSaveClear]} onPress={limparFiltro}>
+                            <Text style={styles.buttonSaveTextClear}>Limpar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.buttonFilter, styles.buttonSaveFilter]} onPress={aplicarFiltro}>
+                            <Text style={styles.buttonSaveTextFilter}>Aplicar Filtro</Text>
+                        </TouchableOpacity>
+                    </View>
                 </GestureHandlerRootView>
-
-                
-
             </View>
         </View>
     );
 }
 const styles = StyleSheet.create({
     buttonAreaFilter: {
-        flexDirection:"row",
-        width:"100%",
-        marginTop:60,
-        justifyContent:"space-around"
+        flexDirection: "row",
+        width: "100%",
+        marginTop: 60,
+        justifyContent: "space-around"
     },
     buttonFilter: {
-        alignItems:"center",
-        marginTop:14,
-        marginBottom:14,
-        padding:8,
-        justifyContent:'center',
+        alignItems: "center",
+        marginTop: 14,
+        marginBottom: 14,
+        padding: 8,
+        justifyContent: 'center',
     },
     buttonSaveFilter: {
         backgroundColor: "#3D5CFF",
         borderRadius: 8,
         width: 236,
         height: 50,
-    
     },
     buttonSaveClear: {
         backgroundColor: "#FFF",
         borderRadius: 8,
-        borderWidth:2,
-        borderColor:"#3D5CFF",
+        borderWidth: 2,
+        borderColor: "#3D5CFF",
         height: 50,
         width: 89,
     },
@@ -170,13 +217,11 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontFamily: "Poppins-Regular",
         fontSize: 16,
-        
     },
     buttonSaveTextClear: {
         color: "#3D5CFF",
         fontFamily: "Poppins-Regular",
         fontSize: 16,
-        
     },
     imgCard: {
         marginLeft: 5,
@@ -199,7 +244,6 @@ const styles = StyleSheet.create({
         borderColor: '#1F1F39',
     },
     duracaoSelecionada: {
-
         fontFamily: 'Poppins-Regular',
         color: '#1F1F39',
         marginBottom: 10,
@@ -207,11 +251,9 @@ const styles = StyleSheet.create({
         marginRight: 5,
         padding: 4,
         borderRadius: 10,
-
         borderColor: '#1F1F39',
     },
     viewduração: {
-
         marginLeft: 10,
         marginTop: 500,
         position: "absolute"
@@ -234,7 +276,7 @@ const styles = StyleSheet.create({
         fontFamily: "Poppins-Regular",
         color: "#1F1F39",
         margin: 5,
-        fontSize:16
+        fontSize: 16
     },
     areaCategoria: {
         left: 0
@@ -243,7 +285,7 @@ const styles = StyleSheet.create({
         fontFamily: "Poppins-Regular",
         color: "#1F1F39",
         margin: 5,
-        fontSize:16
+        fontSize: 16
     },
     textCategorias: {
         fontSize: 16,
@@ -252,8 +294,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 5,
         marginLeft: 20
-
-
     },
     textCategoriasSelecionada: {
         fontSize: 16,
@@ -262,7 +302,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 5,
         marginLeft: 20
-
     },
     categorias: {
         flexDirection: "row",
@@ -271,8 +310,6 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: "rgba(24,24,24,0.6)",
         flex: 1,
-
-
     },
     content: {
         backgroundColor: "#FFF",
@@ -294,7 +331,6 @@ const styles = StyleSheet.create({
     },
     text: {
         color: "#858597",
-
         justifyContent: "center",
         fontFamily: "Poppins-Regular"
     },
@@ -323,5 +359,4 @@ const styles = StyleSheet.create({
         marginTop: 40,
         marginBottom: 20
     }
-
 })
