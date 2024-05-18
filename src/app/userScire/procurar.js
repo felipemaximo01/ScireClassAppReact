@@ -8,7 +8,7 @@ import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import useStorage from "../hooks/useStorage"
-import { useNavigation,useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,17 +27,17 @@ export default function Procurar() {
   const [modalOKVisible, setModalOKVisible] = useState(false)
   const [textResponse, setTextResponse] = useState("")
 
-  
-
   const [filters, setFilters] = useState({
     categorias: [],
-    precoMin: 0, 
-    precoMax: 1000 ,
+    precoMin: 0,
+    precoMax: 1000,
     duracao: '',
     distancia: 0,
   });
 
   const [cursos, setCursos] = useState([])
+
+  const [cursosFav, setCursosFav] = useState([]);
 
   const [fontsLoaded, fontError] = useFonts({
     'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
@@ -84,6 +84,33 @@ export default function Procurar() {
     });
   }
 
+  async function getFavoritos() {
+    setModalLoadingVisible(true)
+    const localhost = await getLocalhost();
+    const token = await getItem("@token");
+    const usuarioId = await getItem("@id");
+
+    fetch(`http://${localhost}:8080/scireclass/curso/favoritos/${usuarioId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        setModalLoadingVisible(false)
+        if (response.ok) {
+          setCursosFav(data)
+        } else if (data.message !== undefined) {
+          setTextResponse(data.message)
+          setModalBADVisible(true)
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        setModalLoadingVisible(false)
+      });
+  }
+
 
 
   function filterShow() {
@@ -109,40 +136,40 @@ export default function Procurar() {
     updateVisibleSubstract(text);
   };
 
-  async function filterCurso(){
+  async function filterCurso() {
     const localhost = await getLocalhost();
     const token = await getItem("@token");
 
     const cursoFilterDTO = {
       nomeCurso: textInputValue,
       categoriasID: filters.categorias,
-      precoMin: filters.precoMin, 
-      precoMax: filters.precoMax ,
+      precoMin: filters.precoMin,
+      precoMax: filters.precoMax,
       duracao: filters.duracao,
       distancia: filters.distancia,
     }
 
-    fetch(`http://${localhost}:8080/scireclass/curso/filter`,{
-      method:"post",
+    fetch(`http://${localhost}:8080/scireclass/curso/filter`, {
+      method: "post",
       body: JSON.stringify(cursoFilterDTO),
-      headers:{
+      headers: {
         "Content-type": "application/json",
         Accept: "application/json",
         Authorization: `Bearer ${token}`
       }
     })
-    .then( async (response) =>{
-      const data = await response.json()
-      if(response.ok){
-        setCursos(data);
-      }else if(data.message !== undefined){
-        setTextResponse(data.message)
-        setModalBADVisible(true)
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    })
+      .then(async (response) => {
+        const data = await response.json()
+        if (response.ok) {
+          setCursos(data);
+        } else if (data.message !== undefined) {
+          setTextResponse(data.message)
+          setModalBADVisible(true)
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      })
   }
 
   const updateVisibleSubstract = (text) => {
@@ -155,11 +182,12 @@ export default function Procurar() {
 
   useEffect(() => {
     filterCurso(); // Chame a função de filtro quando o texto for alterado
-  }, [textInputValue,filters]);
+  }, [textInputValue, filters]);
 
   useFocusEffect(
     useCallback(() => {
       getCursos();
+      getFavoritos();
     }, [])
   )
 
@@ -170,8 +198,40 @@ export default function Procurar() {
   const buscar = async (cursoId) => {
     navigation.navigate('curso', { cursoId: cursoId })
   }
-  const favoritar = async () => {
-    console.log("fav")
+
+  async function handlerFavCurso(cursoId) {
+    const localhost = await getLocalhost();
+    const token = await getItem("@token");
+    const usuarioId = await getItem("@id");
+    setModalLoadingVisible(true)
+    fetch(`http://${localhost}:8080/scireclass/usuario/favorita/${usuarioId}/${cursoId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then(async (response) => {
+      const data = await response.json();
+      setModalLoadingVisible(false)
+      if (response.ok) {
+        getFavoritos()
+      } else if (data.message !== undefined) {
+        setTextResponse(data.message)
+        setModalBADVisible(true)
+      }
+    }).catch((error) => {
+      console.error('Error:', error);
+      setModalLoadingVisible(false)
+    });
+  }
+
+  function renderFavoriteIcon(cursoId) {
+    const isFavorite = cursosFav.some(cursoFav => cursoFav.id === cursoId);
+    return (
+      <Image
+        style={styles.imgFavNot}
+        source={isFavorite ? require("../../assets/favoritoIcon.png") : require("../../assets/iconButtonFav.png")}
+      />
+    );
   }
 
   return (
@@ -188,7 +248,9 @@ export default function Procurar() {
                 <Pressable style={[styles.imgs, { display: visibleSubstract ? 'flex' : 'none' }]} onPress={clearTextInput}><Image style={styles.imgsubtract} source={require("../../assets/subtractIcon.png")} />
                 </Pressable></View>
               <View>
-                <Pressable onPress={filterShow} style={styles.imgs} ><Image style={styles.imgFilter} source={require("../../assets/filterIcon.png")} /></Pressable>
+                <Pressable onPress={filterShow} style={styles.imgs} >
+                  <Image style={styles.imgFilter} source={require("../../assets/filterIcon.png")} />
+                </Pressable>
               </View>
               <TextInput placeholder='O que você proucura ?' style={styles.formInput} onChangeText={handleInputChange} value={textInputValue} />
             </View>
@@ -206,8 +268,10 @@ export default function Procurar() {
           </View>
           {cursos?.map((curso, i) => (
             <Pressable key={i} onPress={() => buscar(curso.id)} style={[styles.card, styles.elevation]}>
-              <View   >
-                <Pressable onPress={favoritar}><Image style={styles.imgFavNot} source={require("../../assets/favoritoIconNot.png")}></Image></Pressable>
+              <View>
+                <Pressable onPress={() => handlerFavCurso(curso.id)}>
+                {renderFavoriteIcon(curso.id)}
+                </Pressable>
                 <Image style={styles.imgCard} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
                 <Text style={styles.cardTextTitle}>{curso.nome}</Text>
                 <Text style={styles.cardText}>{curso.nomeCriador}</Text>
@@ -216,11 +280,9 @@ export default function Procurar() {
                   <Text style={styles.horasText} >{curso.minutosTotalCurso} min</Text>
                 </View>
               </View></Pressable>))}
-
-
         </View>
         <Modal visible={modalFilterVisible} animationType='slide' transparent={true}>
-          <ModalFilter handleClose={() => setModalFilterVisible(false)} onApplyFilters={setFilters} initialFilters={filters}/>
+          <ModalFilter handleClose={() => setModalFilterVisible(false)} onApplyFilters={setFilters} initialFilters={filters} />
         </Modal>
         <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
           <ModalOK textOK={textResponse} handleClose={() => setModalOKVisible(false)} />
