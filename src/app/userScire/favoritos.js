@@ -5,62 +5,153 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useRouter, Link } from 'expo-router'
 import useStorage from "../hooks/useStorage"
 import useLocalhost from "../hooks/useLocalhost"
+import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import * as Progress from 'react-native-progress';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect,useNavigation } from '@react-navigation/native';
 
 
 
 SplashScreen.preventAutoHideAsync();
 
-export default function Favoritos(){
-    const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
-        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
-      });
-    
-      const onLayoutRootView = useCallback(async () => {
-        if (fontsLoaded || fontError) {
-          await SplashScreen.hideAsync();
-        }
-      }, [fontsLoaded, fontError]);
-    
-      if (!fontsLoaded && !fontError) {
-        return null;
+export default function Favoritos() {
+  const navigation = useNavigation();
+
+  const [cursoFav, setCursofav] = useState([]);
+
+  const { getItem } = useStorage();
+  const { getLocalhost } = useLocalhost();
+
+  const [modalBADVisible, setModalBADVisible] = useState(false)
+  const [modalLoadingVisible, setModalLoadingVisible] = useState(false)
+  const [modalOKVisible, setModalOKVisible] = useState(false)
+  const [imageUrl, setImageUrl] = useState("");
+
+  const [textResponse, setTextResponse] = useState("")
+
+  const [fontsLoaded, fontError] = useFonts({
+    'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
+  });
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
+  useEffect(() => {
+    async function loadLocalhost() {
+      const host = await getLocalhost();
+      setImageUrl(host);
+    }
+    loadLocalhost()
+  }, [])
+
+  async function getFavoritos() {
+    setModalLoadingVisible(true)
+    const localhost = await getLocalhost();
+    const token = await getItem("@token");
+    const usuarioId = await getItem("@id");
+
+    fetch(`http://${localhost}:8080/scireclass/curso/favoritos/${usuarioId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        setModalLoadingVisible(false)
+        if (response.ok) {
+          setCursofav(data)
+        } else if (data.message !== undefined) {
+          setTextResponse(data.message)
+          setModalBADVisible(true)
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        setModalLoadingVisible(false)
+      });
+  }
 
-      return(
-      <View onLayout={onLayoutRootView} style={styles.container}> 
-        <View style={styles.title}> 
-         <Text style={styles.titleText}>Favoritos</Text>
-        </View>
-        
-        <View style={[styles.card,styles.elevation]}>
-         <View style={styles.viewImagem}> 
-            <Image style={styles.img} source={require("../../assets/blankImage.png")}/>
-         </View>
-         <View> 
-            <Text style={styles.titleCurso}>Titulo do Curso</Text>
-            <View style={styles.contentTeacher}>
-            <Image style={styles.user} source={require("../../assets/Union.png")}/>
-            <Text style={styles.nameTeacher}>Nome do professor</Text>
+  async function handlerFavCurso(cursoId) {
+    const localhost = await getLocalhost();
+    const token = await getItem("@token");
+    const usuarioId = await getItem("@id");
+    setModalLoadingVisible(true)
+    fetch(`http://${localhost}:8080/scireclass/usuario/favorita/${usuarioId}/${cursoId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then(async (response) => {
+      const data = await response.json();
+      setModalLoadingVisible(false)
+      if (response.ok) {
+        getFavoritos()
+      } else if (data.message !== undefined) {
+        setTextResponse(data.message)
+        setModalBADVisible(true)
+      }
+    })
+  }
+
+  const buscar = async (cursoId) => {
+    navigation.navigate('curso', {cursoId: cursoId})
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      getFavoritos();
+    }, [])
+  )
+
+  return (
+    <View onLayout={onLayoutRootView} style={styles.container}>
+      <View style={styles.title}>
+        <Text style={styles.titleText}>Favoritos</Text>
+      </View>
+      {cursoFav?.map((curso, i) => (
+        <Pressable key={i} onPress={() => buscar(curso.id)} style={[styles.card, styles.elevation]} >
+            <View style={styles.viewImagem}>
+              <Image style={styles.img} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
             </View>
-            <View style={styles.contentHours}>
-                <Text style={styles.textHours}>10 Horas</Text>
+            <View>
+              <Text style={styles.titleCurso}>{curso.nome}</Text>
+              <View style={styles.contentTeacher}>
+                <Image style={styles.user} source={require("../../assets/Union.png")} />
+                <Text style={styles.nameTeacher}>{curso.nomeCriador}</Text>
+              </View>
+              <View style={styles.contentHours}>
+                <Text style={styles.textHours}>{curso.minutosTotalCurso} min</Text>
+              </View>
             </View>
-         </View>
-            <Pressable> 
-                <Image style={styles.fav} source={require("../../assets/iconButtonFav.png")}/>
+            <Pressable onPress={() => handlerFavCurso(curso.id)}>
+              <Image style={styles.fav} source={require("../../assets/favoritoIcon.png")} />
             </Pressable>
-        <View>
-
-        </View>
-        </View>
-    
-      </View>)
+            <View>
+            </View>
+        </Pressable>
+      ))}
+      <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
+        <ModalOK textOK={textResponse} handleClose={() => setModalOKVisible(false)} />
+      </Modal>
+      <Modal visible={modalBADVisible} animationType='fade' transparent={true}>
+        <ModalBAD textOK={textResponse} handleClose={() => setModalBADVisible(false)} />
+      </Modal>
+      <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
+        <ModalLoading />
+      </Modal>
+    </View>)
 }
-const styles = StyleSheet.create({ container: {
+const styles = StyleSheet.create({
+  container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
@@ -70,71 +161,72 @@ const styles = StyleSheet.create({ container: {
     elevation: 20,
     shadowColor: '#52006A',
   },
-    card: {
+  card: {
     backgroundColor: "#FFFFFF",
     width: "90%",
     height: 100,
     borderRadius: 8,
     flexDirection: "row",
     padding: 12,
-    marginTop: 8,
+    marginTop: 12,
   },
-  title:{
+  title: {
     width: "100%",
     alignItems: "center",
-    justifyContent:"center",
+    justifyContent: "center",
     margin: 20,
   },
-  titleText:{
+  titleText: {
     fontSize: 18,
     fontFamily: "Poppins-Bold",
   },
-  viewImagem:{
+  viewImagem: {
     height: 68,
     width: 68,
-    borderRadius:8,
+    borderRadius: 8,
     marginRight: 16,
   },
-  img:{
+  img: {
     height: 68,
     width: 68,
+    borderRadius: 8,
   },
-  titleCurso:{
+  titleCurso: {
     fontSize: 14,
     fontFamily: "Poppins-Regular",
   },
-  nameTeacher:{
+  nameTeacher: {
     fontSize: 12,
     fontFamily: "Poppins-Regular",
     color: "#B8B8D2",
   },
-  user:{
-    height:10,
+  user: {
+    height: 10,
     width: 8.5,
     marginRight: 4,
     marginTop: 4,
   },
-  contentTeacher:{
+  contentTeacher: {
     flexDirection: "row",
   },
-  contentHours:{
+  contentHours: {
     borderRadius: 30,
     backgroundColor: "#FFEBF0",
-    justifyContent:"center",
-    alignItems:"center",
+    justifyContent: "center",
+    alignItems: "center",
     height: 15,
     width: 57,
   },
-  textHours:{
+  textHours: {
     color: "#FF6905",
     fontSize: 10,
     fontFamily: "Poppins-Regular",
   },
-  fav:{
-    height:17.83,
-    width:20,
-    right: -70,
+  fav: {
+    height: 17.83,
+    width: 20,
+    marginLeft: "60%"
   },
 
-  
+
 })
