@@ -8,7 +8,7 @@ import useLocalhost from "../hooks/useLocalhost"
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import * as Progress from 'react-native-progress';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 
 
 
@@ -52,7 +52,32 @@ export default function Home() {
   if (!fontsLoaded && !fontError) {
     return null;
   }
-  
+
+  async function lastCursosUser() {
+    if (token !== null && id !== null) {
+      setModalLoadingVisible(true)
+      fetch(`http://${localhost}:8080/scireclass/matricula/curso/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then((response) => response.json())
+        .then(async (responseJson) => {
+          setModalLoadingVisible(false)
+          if (responseJson.message !== undefined) {
+            setTextResponse(responseJson.message)
+            setModalBADVisible(true)
+          } else {
+            setLastCursos(responseJson)
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    }
+
+  };
+
   useEffect(() => {
     async function jaLogado() {
       const getToken = await getItem("@token")
@@ -104,33 +129,11 @@ export default function Home() {
     userById();
   }, [token, id])
 
-  useEffect(() => {
-    async function lastCursosUser() {
-      if (token !== null && id !== null) {
-        setModalLoadingVisible(true)
-        fetch(`http://${localhost}:8080/scireclass/matricula/curso/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-          .then((response) => response.json())
-          .then(async (responseJson) => {
-            setModalLoadingVisible(false)
-            if (responseJson.message !== undefined) {
-              setTextResponse(responseJson.message)
-              setModalBADVisible(true)
-            } else {
-              setLastCursos(responseJson)
-            }
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-
-    };
-    lastCursosUser();
-  }, [token, id])
+  useFocusEffect(
+    useCallback(() => {
+      lastCursosUser();
+    }, [token, id])
+  )
 
   useEffect(() => {
     async function getMinutosAssitidos() {
@@ -158,17 +161,17 @@ export default function Home() {
 
     };
     getMinutosAssitidos();
-  }, [token,id])
+  }, [token, id])
 
   function carregarQuantidadeAulas(quantidadeAulas) {
     if (quantidadeAulas != null && quantidadeAulas != undefined) {
-        if (quantidadeAulas <= 0) {
-            return 1
-        }
-        return quantidadeAulas
+      if (quantidadeAulas <= 0) {
+        return 1
+      }
+      return quantidadeAulas
     }
     return 1;
-}
+  }
 
   return (
     <View onLayout={onLayoutRootView} style={styles.container}>
@@ -188,7 +191,7 @@ export default function Home() {
           <Text style={styles.minDone}>{minutosAssitidos}MIN</Text>
           <Text style={styles.minGoal}>/60min</Text>
         </View>
-        <Progress.Bar progress={minutosAssitidos/60} width={null} height={6} />
+        <Progress.Bar progress={minutosAssitidos / 60} width={null} height={6} />
       </View>
       <View style={styles.card}>
         <Text style={styles.cardText}>Descubra por novos cursos!</Text>
@@ -204,7 +207,7 @@ export default function Home() {
         {lastCursos?.map((curso, i) => (
           <View key={i} style={styles.lastCourses}>
             <View style={{ flexDirection: "row" }}>
-              <Progress.Circle size={25} progress={curso.quantidadeAulasAssistidas/carregarQuantidadeAulas(curso.quantidadeAulas)} thickness={4} borderWidth={0} color='#707070' fill='none' />
+              <Progress.Circle size={25} progress={curso.quantidadeAulasAssistidas / carregarQuantidadeAulas(curso.quantidadeAulas)} thickness={4} borderWidth={0} color='#707070' fill='none' />
               <Text style={styles.nameLastCourse}>{curso.nome}</Text>
             </View>
             <View style={{ flexDirection: "row", }}>

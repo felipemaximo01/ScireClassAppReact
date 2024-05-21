@@ -8,12 +8,12 @@ import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import useStorage from "../hooks/useStorage"
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Procurar() {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const { getLocalhost } = useLocalhost();
   const { getItem } = useStorage();
@@ -196,7 +196,7 @@ export default function Procurar() {
   }, [])
 
   const buscar = async (cursoId) => {
-    navigation.navigate('curso', { cursoId: cursoId })
+    router.push({ pathname: `userScire/curso/${cursoId}`, params: cursoId })
   }
 
   async function handlerFavCurso(cursoId) {

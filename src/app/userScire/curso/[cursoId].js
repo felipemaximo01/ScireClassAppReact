@@ -2,20 +2,18 @@ import { useCallback, useState, useEffect } from 'react';
 import { SplashScreen } from "expo-router";
 import { ScrollView, View, StyleSheet, Image, Text, Modal, TouchableOpacity } from "react-native";
 import { useFonts } from 'expo-font';
-import useStorage from "../hooks/useStorage"
-import useLocalhost from "../hooks/useLocalhost"
-import { ModalOK } from '../componentes/modal/modalOK';
-import { ModalBAD } from '../componentes/modal/modalBAD';
-import { ModalLoading } from '../componentes/modal/modalLoading';
-import { useRoute } from '@react-navigation/native';
+import useStorage from "../../hooks/useStorage"
+import useLocalhost from "../../hooks/useLocalhost"
+import { ModalOK } from '../../componentes/modal/modalOK';
+import { ModalBAD } from '../../componentes/modal/modalBAD';
+import { ModalLoading } from '../../componentes/modal/modalLoading';
+import {useLocalSearchParams} from "expo-router"
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Curso() {
 
-    const route = useRoute();
-
-    const {cursoId} = route.params;
+    const { cursoId } = useLocalSearchParams();
 
     const [curso, setCurso] = useState([]);
 
@@ -37,8 +35,8 @@ export default function Curso() {
     const { getLocalhost } = useLocalhost();
 
     const [fontsLoaded, fontError] = useFonts({
-        'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
-        'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
+        'Poppins-Regular': require('../../../../assets/fonts/Poppins-Regular.ttf'),
+        'Poppins-Bold': require('../../../../assets/fonts/Poppins-Bold.ttf'),
     });
 
     const onLayoutRootView = useCallback(async () => {
@@ -247,9 +245,9 @@ export default function Curso() {
             </ScrollView>
             <View style={[styles.viewButton, styles.elevation]}>
                 <TouchableOpacity onPress={handlerFavCurso} style={styles.buttonFav}>{!favoritado ?
-                    <Image source={require("../../assets/favoritoIconNot.png")} style={styles.iconButtonFav} />
+                    <Image source={require("../../../assets/favoritoIconNot.png")} style={styles.iconButtonFav} />
                     :
-                    <Image source={require("../../assets/favoritoIcon.png")} style={styles.iconButtonFav} />}
+                    <Image source={require("../../../assets/favoritoIcon.png")} style={styles.iconButtonFav} />}
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handlerBuyCurso} style={styles.buttonBuy}><Text style={styles.textButtonBuy}>Comprar agora</Text></TouchableOpacity>
             </View>

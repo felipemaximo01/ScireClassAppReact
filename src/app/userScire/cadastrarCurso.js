@@ -12,9 +12,7 @@ import { ModalLoading } from '../componentes/modal/modalLoading';
 import { Picker } from '@react-native-picker/picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
-
-
-
+import { useFocusEffect } from 'expo-router'
 
 SplashScreen.preventAutoHideAsync();
 
@@ -67,34 +65,35 @@ export default function cadastrarCurso() {
     return null;
   }
 
-  useEffect(() => {
-    async function getCategorias() {
-      const localhost = await getLocalhost();
-      const token = await getItem("@token")
-      fetch(`http://${localhost}:8080/scireclass/categoria`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+  async function getCategorias() {
+    const localhost = await getLocalhost();
+    const token = await getItem("@token")
+    fetch(`http://${localhost}:8080/scireclass/categoria`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-      ).then(async (response) => {
-        const data = await response.json();
-        if (response.ok) {
-          setCategorias(data);
-        } else {
-          setTextResponse(data.message)
-          setModalBADVisible(true)
-        }
-      }).catch((error) => {
-        console.log(error);
-      })
     }
-    getCategorias();
-  }, [])
+    ).then(async (response) => {
+      const data = await response.json();
+      if (response.ok) {
+        setCategorias(data);
+      } else {
+        setTextResponse(data.message)
+        setModalBADVisible(true)
+      }
+    }).catch((error) => {
+      console.log(error);
+    })
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      getCategorias();
+    },[])
+  )
 
   const handleCadastraCurso = async () => {
-
-    
 
     if (!nome.trim() || !descricao.trim() || !link.trim() || !telefone.trim() || !vagas.trim() || !categoriaId.trim()) {
       setTextResponse("Todos os campos precisam ser preenchidos!")

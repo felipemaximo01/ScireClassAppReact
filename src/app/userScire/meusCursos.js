@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, Pressable, Image, Modal, ScrollView } from 'react-native';
 import { useFonts } from 'expo-font';
-import { Link, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import useStorage from "../hooks/useStorage"
 import useLocalhost from "../hooks/useLocalhost"
 import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
-import { useNavigation } from '@react-navigation/native';
 
 import * as Progress from 'react-native-progress';
 SplashScreen.preventAutoHideAsync();
@@ -16,7 +15,7 @@ SplashScreen.preventAutoHideAsync();
 export default function MeusCursos() {
     const { getItem } = useStorage();
     const { getLocalhost } = useLocalhost();
-    const navigation = useNavigation();
+    const router = useRouter();
 
     const [cursos, setCursos] = useState([]);
 
@@ -53,19 +52,18 @@ export default function MeusCursos() {
         return "";
     }
 
-    useEffect(() => {
-        async function getCursosMatriculados() {
-            const localhost = await getLocalhost();
-            const token = await getItem("@token");
-            const id = await getItem("@id");
+    async function getCursosMatriculados() {
+        const localhost = await getLocalhost();
+        const token = await getItem("@token");
+        const id = await getItem("@id");
 
-            setModalLoadingVisible(true)
-            fetch(`http://${localhost}:8080/scireclass/matricula/curso/all/${id}`, {
-              headers: {
+        setModalLoadingVisible(true)
+        fetch(`http://${localhost}:8080/scireclass/matricula/curso/all/${id}`, {
+            headers: {
                 Authorization: `Bearer ${token}`
-              }
-            })
-              .then(async (response) => {
+            }
+        })
+            .then(async (response) => {
                 const data = await response.json();
                 setModalLoadingVisible(false)
                 if (response.ok) {
@@ -74,49 +72,54 @@ export default function MeusCursos() {
                     setTextResponse(data.message)
                     setModalBADVisible(true)
                 }
-              })
-              .catch((error) => {
-                console.error('Error:', error);
-              });
-    
-        };
-        getCursosMatriculados();
-      }, [])
-
-      useEffect(() => {
-        async function getMinutosAssitidos() {
-            const localhost = await getLocalhost();
-            const token = await getItem("@token");
-            const id = await getItem("@id");
-            setModalLoadingVisible(true)
-            fetch(`http://${localhost}:8080/scireclass/minutosAssistidos/${id}`, {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
             })
-              .then((response) => response.json())
-              .then(async (responseJson) => {
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+    };
+
+    async function getMinutosAssitidos() {
+        const localhost = await getLocalhost();
+        const token = await getItem("@token");
+        const id = await getItem("@id");
+        setModalLoadingVisible(true)
+        fetch(`http://${localhost}:8080/scireclass/minutosAssistidos/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then((response) => response.json())
+            .then(async (responseJson) => {
                 setModalLoadingVisible(false)
                 if (responseJson.message !== undefined) {
-                  setTextResponse(responseJson.message)
-                  setModalBADVisible(true)
+                    setTextResponse(responseJson.message)
+                    setModalBADVisible(true)
                 } else {
-                  setMinutosAssistidos(responseJson.minutos)
+                    setMinutosAssistidos(responseJson.minutos)
                 }
-              })
-              .catch((error) => {
+            })
+            .catch((error) => {
                 console.error('Error:', error);
-              });
-        };
-        getMinutosAssitidos();
-      }, [])
+            });
+    };
 
-      const goToCurso = async (cursoId) => {
+    useFocusEffect(
+        useCallback(() => {
+            getCursosMatriculados();
+        }, []))
 
-        navigation.navigate('curso', {cursoId: cursoId})
-      }
-    
-      function carregarQuantidadeAulas(quantidadeAulas) {
+    useFocusEffect(
+        useCallback(() => {
+            getMinutosAssitidos();
+        }, []))
+
+    const goToCurso = async (cursoId) => {
+
+        router.push({ pathname: `userScire/curso/${cursoId}`, params: cursoId })
+    }
+
+    function carregarQuantidadeAulas(quantidadeAulas) {
         if (quantidadeAulas != null && quantidadeAulas != undefined) {
             if (quantidadeAulas <= 0) {
                 return 1
@@ -125,7 +128,7 @@ export default function MeusCursos() {
         }
         return 1;
     }
-    
+
     return (
         <View onLayout={onLayoutRootView} style={styles.container}>
             <View style={styles.titlepage}>
@@ -141,26 +144,26 @@ export default function MeusCursos() {
                     <Text style={styles.minDone}>{0}MIN</Text>
                     <Text style={styles.minGoal}>/60min</Text>
                 </View>
-                <Progress.Bar progress={minutosAssitidos/60} width={null} height={6} />
+                <Progress.Bar progress={minutosAssitidos / 60} width={null} height={6} />
             </View>
             <ScrollView>
                 <View style={styles.cursosstyleconteiner}>
                     {cursos?.map((curso, i) => (
-                    <View key={i} style={[styles.cursosstyle, styles.elevation]}>
-                        <Text style={styles.cursotitulo}>{carregarNome(curso.nome)} </Text>
-                        <View style={styles.progressbarContainer}>
-                            <Progress.Bar progress={curso.quantidadeAulasAssistidas/carregarQuantidadeAulas(curso.quantidadeAulas)} width={null} height={6} />
-                        </View>
-                        <View style={styles.textConteiner}>
-                            <Text style={styles.textcard}>Completado</Text>
-                            <Text style={styles.textcardprogress}>{curso.quantidadeAulasAssistidas}/{curso.quantidadeAulas}</Text>
-                            <View style={styles.circulo}>
-                                <Pressable onPress={() => goToCurso(curso.id)} style={styles.playContainer}>
-                                    <Image style={styles.imgPlay} source={require("../../assets/play.png")} />
-                                </Pressable>
+                        <View key={i} style={[styles.cursosstyle, styles.elevation]}>
+                            <Text style={styles.cursotitulo}>{carregarNome(curso.nome)} </Text>
+                            <View style={styles.progressbarContainer}>
+                                <Progress.Bar progress={curso.quantidadeAulasAssistidas / carregarQuantidadeAulas(curso.quantidadeAulas)} width={null} height={6} />
+                            </View>
+                            <View style={styles.textConteiner}>
+                                <Text style={styles.textcard}>Completado</Text>
+                                <Text style={styles.textcardprogress}>{curso.quantidadeAulasAssistidas}/{curso.quantidadeAulas}</Text>
+                                <View style={styles.circulo}>
+                                    <Pressable onPress={() => goToCurso(curso.id)} style={styles.playContainer}>
+                                        <Image style={styles.imgPlay} source={require("../../assets/play.png")} />
+                                    </Pressable>
+                                </View>
                             </View>
                         </View>
-                    </View>
                     ))}
                 </View>
             </ScrollView>
@@ -219,8 +222,8 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'space-between',
         padding: 20,
-        width:'100%',
-        height:'100%'
+        width: '100%',
+        height: '100%'
     },
 
     cursosstyle: {

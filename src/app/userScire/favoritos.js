@@ -7,14 +7,14 @@ import useLocalhost from "../hooks/useLocalhost"
 import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
-import { useFocusEffect,useNavigation } from '@react-navigation/native';
+import { useFocusEffect,useRouter } from 'expo-router';
 
 
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Favoritos() {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const [cursoFav, setCursoFav] = useState([]);
 
@@ -104,7 +104,7 @@ export default function Favoritos() {
   }
 
   const buscar = async (cursoId) => {
-    navigation.navigate('curso', {cursoId: cursoId})
+    router.push({pathname: `userScire/curso/${cursoId}`, params: cursoId})
   }
 
   useFocusEffect(

@@ -88,7 +88,7 @@ export default function Layout() {
                         style={styles.imgFavoritos} />
                 }
             }} />
-            <Tabs.Screen name='curso' options={{
+            <Tabs.Screen name='curso/[cursoId]' options={{
                 title: "Curso",
                 headerShown: false,
                 href:null
