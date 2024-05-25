@@ -35,7 +35,7 @@ export default function Layout() {
     return (
         <Tabs screenOptions={({ route }) => ({
             headerShown: false, tabBarHideOnKeyboard: true, tabBarStyle: {
-                display: route.name === 'curso' ? 'none' : 'flex'
+                display: route.name === 'curso/[cursoId]' ? 'none' : 'flex'
             }
         })}>
             <Tabs.Screen name='home' options={{
@@ -90,6 +90,11 @@ export default function Layout() {
             }} />
             <Tabs.Screen name='curso/[cursoId]' options={{
                 title: "Curso",
+                headerShown: false,
+                href:null
+            }} />
+             <Tabs.Screen name='conta' options={{
+                title: "Conta",
                 headerShown: false,
                 href:null
             }} />

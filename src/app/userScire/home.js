@@ -177,8 +177,8 @@ export default function Home() {
         <View style={styles.textContainer}>
           <Text style={styles.titleText}>Oi, {usuarioDTO.nome}</Text>
           <Text style={styles.subTitleText}>Vamos começar a aprender!</Text>
-        </View>
-        <Pressable><Image source={require("../../assets/userIcon.png")} style={styles.userIcon} /></Pressable>
+        </View><Link asChild href={"userScire/conta"}>
+        <Pressable><Image source={require("../../assets/userIcon.png")} style={styles.userIcon} /></Pressable></Link>
       </View>
       <View style={[styles.titleContent, styles.elevation]}>
         <View style={styles.textTitleContent}>
