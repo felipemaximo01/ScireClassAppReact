@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Pressable, Image, Modal } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Pressable, Image, Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useRouter, Link } from 'expo-router'
@@ -35,7 +35,7 @@ export default function Home() {
 
   const [textResponse, setTextResponse] = useState("")
 
-  const [minutosAssitidos, setMinutosAssistidos] = useState(0)
+  const [minutosAssitidos, setMinutosAssitidos] = useState(0)
 
 
   const [fontsLoaded, fontError] = useFonts({
@@ -129,39 +129,37 @@ export default function Home() {
     userById();
   }, [token, id])
 
+  async function getMinutosAssitidos() {
+    if (token !== null && id !== null) {
+      setModalLoadingVisible(true)
+      fetch(`http://${localhost}:8080/scireclass/minutosAssistidos/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then((response) => response.json())
+        .then(async (responseJson) => {
+          setModalLoadingVisible(false)
+          if (responseJson.message !== undefined) {
+            setTextResponse(responseJson.message)
+            setModalBADVisible(true)
+          } else {
+            setMinutosAssitidos(responseJson.minutos)
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    }
+
+  };
+
   useFocusEffect(
     useCallback(() => {
       lastCursosUser();
+      getMinutosAssitidos()
     }, [token, id])
   )
-
-  useEffect(() => {
-    async function getMinutosAssitidos() {
-      if (token !== null && id !== null) {
-        setModalLoadingVisible(true)
-        fetch(`http://${localhost}:8080/scireclass/minutosAssistidos/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-          .then((response) => response.json())
-          .then(async (responseJson) => {
-            setModalLoadingVisible(false)
-            if (responseJson.message !== undefined) {
-              setTextResponse(responseJson.message)
-              setModalBADVisible(true)
-            } else {
-              setMinutosAssistidos(responseJson.minutos)
-            }
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
-
-    };
-    getMinutosAssitidos();
-  }, [token, id])
 
   function carregarQuantidadeAulas(quantidadeAulas) {
     if (quantidadeAulas != null && quantidadeAulas != undefined) {
