@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Pressable, Image, Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
+import { useRouter, Link } from 'expo-router'
 
 export default function Conta() {
     const [fontsLoaded, fontError] = useFonts({
@@ -26,18 +27,18 @@ export default function Conta() {
             <View ><Text style={styles.opcoes}>Certificados</Text></View>
             <View><Text style={styles.opcoes}>Editar conta</Text></View>
             <View><Text style={styles.opcoes}>Configuração de Privacidade</Text></View>
-            <View><Text style={styles.opcoes}>Ajuda</Text></View>
+            <Link href={"userScire/cursosCriados"}><View><Text style={styles.opcoes}>Ajuda</Text></View></Link>
 
 
-        </View>
+        </View >
     )
 }
 const styles = StyleSheet.create({
     conteinerimg: {
         width: "100%",
         height: 100,
-        justifyContent:"center",
-        alignItems:'center'
+        justifyContent: "center",
+        alignItems: 'center'
     },
     imagem: {
         height: 79,
@@ -51,13 +52,13 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
         padding: 16,
-        backgroundColor:'#FFFFFF'
+        backgroundColor: '#FFFFFF'
     },
     opcoes: {
         width: "100%",
         height: "30",
         fontSize: 16,
-        marginBottom:24,
+        marginBottom: 24,
         fontFamily: "Poppins-Regular",
 
     },

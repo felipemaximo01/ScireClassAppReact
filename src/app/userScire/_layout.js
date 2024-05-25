@@ -98,6 +98,16 @@ export default function Layout() {
                 headerShown: false,
                 href:null
             }} />
+            <Tabs.Screen name='gerenciarAlunos' options={{
+                title: "Gerenciar Alunos",
+                headerShown: false,
+                href:null
+            }} />
+            <Tabs.Screen name='cursosCriados' options={{
+                title: "Cursos Criados",
+                headerShown: false,
+                href:null
+            }} />
         </Tabs>
     )
 }
