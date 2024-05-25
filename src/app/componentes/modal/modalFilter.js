@@ -1,13 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image } from "react-native";
-import { useEffect, useState, useCallback} from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import RangeSlider, { Slider } from 'react-native-range-slider-expo';
+import Slider from "@react-native-community/slider";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated'
 import useStorage from "../../hooks/useStorage"
 import useLocalhost from "../../hooks/useLocalhost";
+import MultiSlider from "@ptomasroos/react-native-multi-slider";
 
-export function ModalFilter({ handleClose,onApplyFilters,initialFilters }) {
+export function ModalFilter({ handleClose, onApplyFilters, initialFilters }) {
 
     const { getLocalhost } = useLocalhost();
     const { getItem } = useStorage();
@@ -48,7 +49,7 @@ export function ModalFilter({ handleClose,onApplyFilters,initialFilters }) {
     function aplicarFiltro() {
         onApplyFilters({
             categorias: categoriasSelecionadas,
-            precoMin:  fromValue, 
+            precoMin: fromValue,
             precoMax: toValue,
             duracao: duracaoSelecionada,
             distancia: value,
@@ -64,7 +65,7 @@ export function ModalFilter({ handleClose,onApplyFilters,initialFilters }) {
         setDuracaoSelecionada('');
         onApplyFilters({
             categorias: [],
-            precoMin: 0, 
+            precoMin: 0,
             precoMax: 1000,
             duracao: '',
             distancia: 0,
@@ -76,29 +77,34 @@ export function ModalFilter({ handleClose,onApplyFilters,initialFilters }) {
         const localhost = await getLocalhost();
         const token = await getItem("@token")
         fetch(`http://${localhost}:8080/scireclass/categoria`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
         }
         ).then(async (response) => {
-          const data = await response.json();
-          if (response.ok) {
-            setCategorias(data);
-          } else {
-            setTextResponse(data.message)
-            setModalBADVisible(true)
-          }
+            const data = await response.json();
+            if (response.ok) {
+                setCategorias(data);
+            } else {
+                setTextResponse(data.message)
+                setModalBADVisible(true)
+            }
         }).catch((error) => {
-          console.log(error);
+            console.log(error);
         })
-      }
+    }
 
-      useFocusEffect(
+    useFocusEffect(
         useCallback(() => {
-          getCategorias();
+            getCategorias();
         }, [])
-      )
+    )
+
+    const handleValuesChange = (values) => {
+        setFromValue(values[0]);
+        setToValue(values[1]);
+    };
 
     return (
         <View style={styles.container}>
@@ -108,11 +114,11 @@ export function ModalFilter({ handleClose,onApplyFilters,initialFilters }) {
                 <View style={styles.areaCategoria}><Text style={styles.textCategoria}>Categorias</Text></View>
                 <View style={styles.categorias}>
                     {categorias?.map((categoria, i) => (
-                    <Pressable key={i} onPress={() => toggleCategoria(categoria.id)}>
-                        <Text style={[styles.textCategorias, isCategoriaSelecionada(categoria.id) && styles.textCategoriasSelecionada]}>
-                            {categoria.nome}
-                        </Text>
-                    </Pressable>
+                        <Pressable key={i} onPress={() => toggleCategoria(categoria.id)}>
+                            <Text style={[styles.textCategorias, isCategoriaSelecionada(categoria.id) && styles.textCategoriasSelecionada]}>
+                                {categoria.nome}
+                            </Text>
+                        </Pressable>
                     ))}
                 </View>
                 <View style={styles.viewDuracao}>
@@ -144,32 +150,58 @@ export function ModalFilter({ handleClose,onApplyFilters,initialFilters }) {
                     <Text style={styles.titlePreco}>Preço</Text>
                 </View>
                 <GestureHandlerRootView style={styles.interact}>
-                    <View>
-                        <RangeSlider min={0} max={1000} step={10}
-                            fromValueOnChange={value => setFromValue(value)}
-                            toValueOnChange={value => setToValue(value)}
-                            initialFromValue={fromValue}
-                            initialToValue={toValue}
-                            styleSize='small'
-                            inRangeBarColor='#3D5CFF'
-                            outOfRangeBarColor='#B8B8D2'
-                            fromKnobColor='#3D5CFF'
-                            toKnobColor="#3D5CFF"
+                    <View style={{ paddingLeft: 16 }}>
+                        <MultiSlider values={[fromValue, toValue]}
+                            min={0}
+                            max={1000}
+                            step={10}
+                            sliderLength={360}
+                            onValuesChange={handleValuesChange}
+                            markerStyle={{
+                                height: 22,
+                                width: 22,
+                                borderRadius: 11,
+                                backgroundColor: '#FFFFFF',
+                                borderWidth: 2,
+                                borderColor: '#3D5CFF'
+                            }}
+                            trackStyle={{
+                                height: 4, // Adjust the height of the track
+                            }}
+                            selectedStyle={{ backgroundColor: '#3D5CFF' }}
+                            unselectedStyle={{ backgroundColor: '#B8B8D2' }}
                         />
                         <View style={styles.precos}><Text style={styles.textopreco}> R${fromValue} - </Text>
                             <Text style={styles.textopreco}>R${toValue}</Text></View>
                     </View>
-                    <View style={styles.distaceview}>
+                    <View style={{ paddingLeft: 16 }}>
                         <Text style={styles.titlePreco}>Distância</Text>
-                        <Slider min={0} max={50} step={1}
-                            valueOnChange={value => setValue(value)}
-                            initialValue={value}
-                            styleSize='small'
-                            knobColor='#3D5CFF'
-                            inRangeBarColor='#B8B8D2'
-                            outOfRangeBarColor='#3D5CFF'
+                        <MultiSlider
+                            values={[value]}
+                            min={0}
+                            max={50}
+                            step={1}
+                            sliderLength={360}
+                            onValuesChange={values => setValue(values[0])}
+                            markerStyle={{
+                                height: 22,
+                                width: 22,
+                                borderRadius: 11,
+                                backgroundColor: '#FFFFFF',
+                                borderWidth: 2,
+                                borderColor: '#3D5CFF'
+                            }}
+                            trackStyle={{
+                                height: 4, // Adjust the height of the track
+                            }}
+                            selectedStyle={{ 
+                                backgroundColor: '#3D5CFF',
+                              }}
+                            unselectedStyle={{ 
+                                backgroundColor: '#B8B8D2',
+                            }}
                         />
-                        <View style={styles.precos}>
+                        <View>
                             <Text style={styles.textopreco}>{value} Km</Text></View>
                     </View>
                     <View style={styles.buttonAreaFilter}>
@@ -189,7 +221,7 @@ const styles = StyleSheet.create({
     buttonAreaFilter: {
         flexDirection: "row",
         width: "100%",
-        marginTop: 60,
+        marginTop: 25,
         justifyContent: "space-around"
     },
     buttonFilter: {
@@ -263,10 +295,11 @@ const styles = StyleSheet.create({
     },
     textopreco: {
         fontFamily: "Poppins-Regular",
+        textAlign: 'center'
     },
     precos: {
         flexDirection: "row",
-        paddingLeft: "40%"
+        justifyContent:'center'
     },
     interact: {
         height: "100%",
@@ -276,7 +309,7 @@ const styles = StyleSheet.create({
         fontFamily: "Poppins-Regular",
         color: "#1F1F39",
         margin: 5,
-        fontSize: 16
+        fontSize: 16,
     },
     areaCategoria: {
         left: 0
