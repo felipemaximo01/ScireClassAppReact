@@ -91,22 +91,28 @@ export default function Layout() {
             <Tabs.Screen name='curso/[cursoId]' options={{
                 title: "Curso",
                 headerShown: false,
-                href:null
+                href: null
             }} />
-             <Tabs.Screen name='conta' options={{
+            <Tabs.Screen name='conta' options={{
                 title: "Conta",
                 headerShown: false,
-                href:null
+                href: null
             }} />
             <Tabs.Screen name='gerenciarAlunos' options={{
                 title: "Gerenciar Alunos",
                 headerShown: false,
-                href:null
+                href: null
             }} />
             <Tabs.Screen name='cursosCriados' options={{
                 title: "Cursos Criados",
                 headerShown: false,
-                href:null
+                href: null
+            }} />
+
+            <Tabs.Screen name='homeProfessor' options={{
+                title: "Home Professor",
+                headerShown: false,
+                href: null
             }} />
         </Tabs>
     )

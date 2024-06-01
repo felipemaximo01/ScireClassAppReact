@@ -26,7 +26,7 @@ export default function Conta() {
             <View style={styles.conteinerimg} ><Image style={styles.imagem} source={require("../../assets/userIcon.png")} /></View>
             <View ><Text style={styles.opcoes}>Certificados</Text></View>
             <View><Text style={styles.opcoes}>Editar conta</Text></View>
-            <View><Text style={styles.opcoes}>Configuração de Privacidade</Text></View>
+            <Link href={"userScire/homeProfessor"}><View><Text style={styles.opcoes}>Configuração de Privacidade</Text></View></Link>
             <Link href={"userScire/cursosCriados"}><View><Text style={styles.opcoes}>Ajuda</Text></View></Link>
 
 
