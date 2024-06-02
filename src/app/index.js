@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import {Link,Redirect } from 'expo-router'
 import AppIntroSlider from 'react-native-app-intro-slider';
 import useStorage from './hooks/useStorage';
+import 'text-encoding';
 
 
 const slides = [
@@ -35,6 +36,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function Page1() {
   const [showHome,setShowHome] = useState(false);
+  const [showHomeProfessor,setShowHomeProfessor] = useState(false);
   const {getItem} = useStorage();
 
   useEffect(() =>{
@@ -43,9 +45,17 @@ export default function Page1() {
       const getId = await getItem("@id")
       if((getToken !== null && getToken !== undefined && getToken !== "")
           && (getId !== null && getId !== undefined && getId !== "")){
-        setShowHome(true)
+        const getPerfil = await getItem("@perfil")
+        if(getPerfil !== null && getPerfil !== undefined && getPerfil !== ""){
+          if(getPerfil == "ALUNO"){
+            setShowHome(true)
+          }else if(getPerfil == "PROFESSOR"){
+            setShowHomeProfessor(true)
+          }
+        }
       }else{
         setShowHome(false)
+        setShowHomeProfessor(false)
       }
     };
     jaLogado();
@@ -65,10 +75,6 @@ export default function Page1() {
   if (!fontsLoaded && !fontError) {
     return null;
   }
-
-
-
-  
 
   function renderSlides({item}){
     return(
@@ -97,6 +103,8 @@ export default function Page1() {
 
   if(showHome){
     return <Redirect href="/userScire/home" />;
+  }else if (showHomeProfessor){
+    return <Redirect href="/userScire/homeProfessor" />;
   }else{
     return (
         <AppIntroSlider

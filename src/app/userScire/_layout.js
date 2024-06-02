@@ -10,6 +10,8 @@ export default function Layout() {
     const [perfil, setPerfil] = useState("")
     const [aluno, setAluno] = useState(null)
     const [professor, setProfessor] = useState(null)
+    const [homeProfessor, setHomeProfessor] = useState(null)
+    const [homeAluno, setHomeAluno] = useState(null)
 
     useEffect(() => {
         async function getUserPerfil() {
@@ -25,8 +27,10 @@ export default function Layout() {
         function setProfile() {
             if (perfil == "ALUNO") {
                 setAluno("/userScire/favoritos")
+                setHomeAluno("/userScire/home")
             } else if (perfil == "PROFESSOR") {
                 setProfessor("/userScire/cadastrarCurso")
+                setHomeProfessor("/userScire/homeProfessor")
             }
         }
         setProfile()
@@ -35,12 +39,24 @@ export default function Layout() {
     return (
         <Tabs screenOptions={({ route }) => ({
             headerShown: false, tabBarHideOnKeyboard: true, tabBarStyle: {
-                display: route.name === 'curso/[cursoId]' ? 'none' : 'flex'
+                display: route.name === 'curso/[cursoId]' || route.name === 'chat/[chatId]' ? 'none' : 'flex'
+                
             }
         })}>
             <Tabs.Screen name='home' options={{
                 title: "Home",
                 headerShown: false,
+                href: homeAluno,
+                tabBarIcon: () => {
+                    return <Image source={require("../../assets/homeIcon.png")}
+                        style={styles.imgHome} />
+                }
+            }} />
+
+            <Tabs.Screen name='homeProfessor' options={{
+                title: "Home Professor",
+                headerShown: false,
+                href: homeProfessor,
                 tabBarIcon: () => {
                     return <Image source={require("../../assets/homeIcon.png")}
                         style={styles.imgHome} />
@@ -84,7 +100,7 @@ export default function Layout() {
                 headerShown: false,
                 href: professor,
                 tabBarIcon: () => {
-                    return <Image source={require("../../assets/favoritoIcon.png")}
+                    return <Image source={require("../../assets/tabBarCadastroCurso.png")}
                         style={styles.imgFavoritos} />
                 }
             }} />
@@ -108,9 +124,8 @@ export default function Layout() {
                 headerShown: false,
                 href: null
             }} />
-
-            <Tabs.Screen name='homeProfessor' options={{
-                title: "Home Professor",
+            <Tabs.Screen name='chat/[chatId]' options={{
+                title: "Chat",
                 headerShown: false,
                 href: null
             }} />

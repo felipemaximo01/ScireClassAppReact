@@ -2,13 +2,12 @@ import { useCallback, useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Pressable, Image, Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { useRouter, Link } from 'expo-router'
+import { useRouter, Link,useFocusEffect } from 'expo-router'
 import useStorage from "../hooks/useStorage"
 import useLocalhost from "../hooks/useLocalhost"
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import * as Progress from 'react-native-progress';
-import { useFocusEffect } from 'expo-router';
 
 
 
