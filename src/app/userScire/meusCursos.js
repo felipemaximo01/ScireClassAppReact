@@ -141,7 +141,7 @@ export default function MeusCursos() {
                     <Text style={styles.textBase}>Aprendi hoje</Text>
                 </View>
                 <View style={styles.progressClass}>
-                    <Text style={styles.minDone}>{0}MIN</Text>
+                    <Text style={styles.minDone}>{minutosAssitidos}MIN</Text>
                     <Text style={styles.minGoal}>/60min</Text>
                 </View>
                 <Progress.Bar progress={minutosAssitidos / 60} width={null} height={6} />

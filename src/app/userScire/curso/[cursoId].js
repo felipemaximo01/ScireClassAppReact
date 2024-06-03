@@ -1,13 +1,13 @@
 import { useCallback, useState, useEffect } from 'react';
-import { SplashScreen } from "expo-router";
-import { ScrollView, View, StyleSheet, Image, Text, Modal, TouchableOpacity } from "react-native";
+import { SplashScreen, useLocalSearchParams } from "expo-router";
+import { ScrollView, View, StyleSheet, Image, Text, Modal, TouchableOpacity, Pressable } from "react-native";
 import { useFonts } from 'expo-font';
 import useStorage from "../../hooks/useStorage"
 import useLocalhost from "../../hooks/useLocalhost"
 import { ModalOK } from '../../componentes/modal/modalOK';
 import { ModalBAD } from '../../componentes/modal/modalBAD';
 import { ModalLoading } from '../../componentes/modal/modalLoading';
-import {useLocalSearchParams} from "expo-router"
+import { VideoScreen } from '../../componentes/video.js'
 
 SplashScreen.preventAutoHideAsync();
 
@@ -23,9 +23,14 @@ export default function Curso() {
 
     const [imageUrl, setImageUrl] = useState("");
 
+    const [videoUrl, setVideoUrl] = useState("")
+
+    const [matricula, setMatricula] =  useState(false)
+
     const [modalBADVisible, setModalBADVisible] = useState(false)
     const [modalLoadingVisible, setModalLoadingVisible] = useState(false)
     const [modalOKVisible, setModalOKVisible] = useState(false)
+    const [modalVideoVisible, setModalVideoVisible] = useState(false)
 
     const [favoritado, setFavoritado] = useState(false);
 
@@ -162,6 +167,29 @@ export default function Curso() {
         favoritado();
     }, [cursoId])
 
+    useEffect(() => {
+        const matriculado = async () => {
+            const localhost = await getLocalhost();
+            const token = await getItem("@token");
+            const usuarioId = await getItem("@id");
+            fetch(`http://${localhost}:8080/scireclass/matricula/findalunoandcurso/${usuarioId}/${cursoId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }).then(async (response) => {
+                const data = await response.json();
+                if (response.ok) {
+                    setMatricula(true);
+                } else if (data.message !== undefined) {
+                    setMatricula(false)
+                }
+            }).catch((error) => {
+                console.log(error);
+            })
+        };
+        matriculado();
+    }, [cursoId])
+
     const handlerFavCurso = async () => {
 
         const localhost = await getLocalhost();
@@ -177,11 +205,11 @@ export default function Curso() {
             const data = await response.json();
             setModalLoadingVisible(false)
             if (response.ok) {
-                if(favoritado === false){
+                if (favoritado === false) {
                     setFavoritado(true)
                     setTextResponse("Favoritado com sucesso")
                     setModalOKVisible(true)
-                }else if (favoritado === true) {
+                } else if (favoritado === true) {
                     setFavoritado(false)
                     setTextResponse("O curso foi removido da sua lista de favoritos")
                     setModalOKVisible(true)
@@ -217,6 +245,41 @@ export default function Curso() {
         })
     }
 
+    const handleButtonVideo = async (aulaId) => {
+
+        const localhost = await getLocalhost();
+        const token = await getItem("@token");
+        const usuarioId = await getItem("@id");
+
+        fetch(`http://${localhost}:8080/scireclass/aula/matricula/${usuarioId}/${aulaId}`, {
+            method: "post",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(async (response) => {
+                const data = await response.json();
+                if (response.ok) {
+                    console.log(data)
+                    setVideoUrl(`http://${localhost}:8080/scireclass/video/downloadvideo?path=${data.path}`)
+                    setModalVideoVisible(true)
+                } else {
+                    setTextResponse(data.message);
+                    setModalBADVisible(true);
+                }
+
+            }).catch((error) => {
+                console.error('Error:', error);
+            })
+
+
+    }
+
+    const handleCloseVideo = () => {
+        setModalVideoVisible(false);
+        setVideoUrl("")
+    };
+
     return (
         <View onLayout={onLayoutRootView} style={styles.container}>
             <View style={styles.viewImage}>
@@ -236,10 +299,22 @@ export default function Curso() {
                         <Text style={styles.textAbout}>{curso.descricao}</Text>
                     </View>
                     {aulas?.map((aula, i) => (
-                        <View key={i} style={styles.aulaCurso}>
-                            <Text style={styles.numberAula}>{aula.ordem + 1}</Text>
-                            <Text style={styles.titleAula}>{aula.nome}</Text>
+                        <View key={i} style={[styles.aulaCurso, styles.alignItemsCenter]}>
+                            <View style={styles.leftContent}>
+                                <Text style={styles.numberAula}>{aula.ordem + 1}</Text>
+                                <View>
+                                    <Text style={styles.titleAula}>{aula.nome}</Text>
+                                    <Text style={styles.duracaoAula}>{aula.duracao} mins</Text>
+                                </View>
+                            </View>
+                            {matricula ?
+                            <Pressable onPress={() => handleButtonVideo(aula.id)} style={styles.buttonPlay}>
+                                <Image style={styles.buttonImg} source={require("../../../assets/buttonPlay.png")} />
+                            </Pressable> :
+                                 <Image style={styles.buttonImg} source={require("../../../assets/locked.png")} />
+                            }
                         </View>
+
                     ))}
                 </View>
             </ScrollView>
@@ -260,6 +335,10 @@ export default function Curso() {
             <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
                 <ModalLoading />
             </Modal>
+            <Modal visible={modalVideoVisible} animationType='fade' transparent={true}>
+                <VideoScreen onClose={handleCloseVideo} videoPath={videoUrl} />
+            </Modal>
+
         </View>
     )
 }
@@ -338,7 +417,13 @@ const styles = StyleSheet.create({
     },
     aulaCurso: {
         margin: 8,
-        flexDirection: "row"
+        flexDirection: "row",
+        justifyContent: "space-between", // Isso alinha os itens ao longo do eixo principal (horizontal) e coloca espaço entre eles
+        alignItems: "center"
+    },
+    leftContent: {
+        flexDirection: "row",
+        alignItems: "center",
     },
     numberAula: {
         color: "#B8B8D2",
@@ -356,11 +441,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFFFF",
         width: "100%",
         height: 98,
-        padding:12,
+        padding: 12,
         flexDirection: "row",
         justifyContent: 'space-around',
-        borderTopLeftRadius:8,
-        borderTopRightRadius:8
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8
     },
     buttonFav: {
         backgroundColor: "#FFEBF0",
@@ -390,7 +475,16 @@ const styles = StyleSheet.create({
     elevation: {
         elevation: 15,
         shadowColor: '#52006A',
-      },
+    },
+    duracaoAula: {
+        fontSize: 12,
+        fontFamily: 'Poppins-Regular',
+        color: '#B8B8D2'
+    },
+    buttonImg: {
+        width: 44.13,
+        height: 44
+    }
 
 
 })
