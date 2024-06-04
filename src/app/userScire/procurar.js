@@ -9,6 +9,7 @@ import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import useStorage from "../hooks/useStorage"
 import { useRouter, useFocusEffect } from 'expo-router';
+import {StarRatingDisplay} from 'react-native-star-rating-widget';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -275,6 +276,7 @@ export default function Procurar() {
                 <Image style={styles.imgCard} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
                 <Text style={styles.cardTextTitle}>{curso.nome}</Text>
                 <Text style={styles.cardText}>{curso.nomeCriador}</Text>
+                <StarRatingDisplay starStyle={{}} style={styles.cardStar} starSize={12} rating={curso.avaliacao}/>
                 <Text style={styles.cardTextPrice}>R${curso.valor}</Text>
                 <View style={styles.horas}>
                   <Text style={styles.horasText} >{curso.minutosTotalCurso} min</Text>
@@ -466,6 +468,14 @@ const styles = StyleSheet.create({
     marginLeft: 100,
     marginTop: 15,
 
+  },
+  cardStar: {
+    position: "absolute",
+    textAlign: "center",
+    padding: 8,
+    marginLeft: 100,
+    marginTop: 29,
+    
   },
   imgCard: {
     width: 80,

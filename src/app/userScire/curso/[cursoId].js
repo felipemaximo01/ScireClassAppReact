@@ -9,6 +9,7 @@ import { ModalBAD } from '../../componentes/modal/modalBAD';
 import { ModalLoading } from '../../componentes/modal/modalLoading';
 import { VideoScreen } from '../../componentes/video.js'
 import { Maps } from '../../componentes/maps.js';
+import { ModalAvaliacao } from '../../componentes/modal/modalAvaliacao.js';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,6 +33,7 @@ export default function Curso() {
     const [modalLoadingVisible, setModalLoadingVisible] = useState(false)
     const [modalOKVisible, setModalOKVisible] = useState(false)
     const [modalVideoVisible, setModalVideoVisible] = useState(false)
+    const [modalAvaliacaoVisible, setModalAvaliacaoVisible] = useState(false)
 
     const [favoritado, setFavoritado] = useState(false);
 
@@ -249,9 +251,9 @@ export default function Curso() {
             const data = await response.json();
             setModalLoadingVisible(false)
             if (response.ok) {
-                if(online){
+                if (online) {
                     setTextResponse("Matricula realizada com sucesso! N° de matricula: " + data.numeroMatricula)
-                }else if(!online){
+                } else if (!online) {
                     setTextResponse("Foi solicitado um pedido de matricula ao professor, verifiquei sua caixa de mensagens!")
                 }
                 setModalOKVisible(true)
@@ -349,6 +351,10 @@ export default function Curso() {
         setVideoUrl("")
     };
 
+    const handlerAvaliacaoCurso = () => {
+        setModalAvaliacaoVisible(true);
+    };
+
     useEffect(() => {
         getEnderecoCurso();
         getEnderecoUsuario();
@@ -420,14 +426,21 @@ export default function Curso() {
                     :
                     <Image source={require("../../../assets/favoritoIcon.png")} style={styles.iconButtonFav} />}
                 </TouchableOpacity>
+                {!matricula ?
+                    <TouchableOpacity onPress={handlerBuyCurso} style={styles.buttonBuy}>
+                        {online ?
+                            <Text style={styles.textButtonBuy}>Comprar agora</Text>
+                            :
+                            <Text style={styles.textButtonBuy}>Tenho Interesse</Text>
+                        }
+                    </TouchableOpacity>
+                    :
 
-                <TouchableOpacity onPress={handlerBuyCurso} style={styles.buttonBuy}>
-                    {online ?
-                        <Text style={styles.textButtonBuy}>Comprar agora</Text>
-                        :
-                        <Text style={styles.textButtonBuy}>Tenho Interesse</Text>
-                    }
-                </TouchableOpacity>
+                    <TouchableOpacity onPress={handlerAvaliacaoCurso} style={styles.buttonBuy}>
+                        <Text style={styles.textButtonBuy}>Avaliar</Text>
+                    </TouchableOpacity>
+
+                }
             </View>
             <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
                 <ModalOK textOK={textResponse} handleClose={() => setModalOKVisible(false)} />
@@ -437,6 +450,9 @@ export default function Curso() {
             </Modal>
             <Modal visible={modalLoadingVisible} animationType='fade' transparent={true}>
                 <ModalLoading />
+            </Modal>
+            <Modal visible={modalAvaliacaoVisible} animationType='fade' transparent={true}>
+                <ModalAvaliacao cursoId={cursoId} handleClose={() => setModalAvaliacaoVisible(false)}  />
             </Modal>
             <Modal visible={modalVideoVisible} animationType='fade' transparent={true}>
                 <VideoScreen onClose={handleCloseVideo} videoPath={videoUrl} />

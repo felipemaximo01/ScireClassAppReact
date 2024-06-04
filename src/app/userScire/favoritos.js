@@ -8,6 +8,7 @@ import { ModalOK } from '../componentes/modal/modalOK';
 import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import { useFocusEffect,useRouter } from 'expo-router';
+import {StarRatingDisplay} from 'react-native-star-rating-widget';
 
 
 
@@ -129,6 +130,7 @@ export default function Favoritos() {
                 <Image style={styles.user} source={require("../../assets/Union.png")} />
                 <Text style={styles.nameTeacher}>{curso.nomeCriador}</Text>
               </View>
+              <StarRatingDisplay  style={{marginBottom: 6}} starSize={12} rating={curso.avaliacao}/>
               <View style={styles.contentHours}>
                 <Text style={styles.textHours}>{curso.minutosTotalCurso} min</Text>
               </View>
