@@ -8,6 +8,7 @@ import { ModalOK } from '../../componentes/modal/modalOK';
 import { ModalBAD } from '../../componentes/modal/modalBAD';
 import { ModalLoading } from '../../componentes/modal/modalLoading';
 import { VideoScreen } from '../../componentes/video.js'
+import { Maps } from '../../componentes/maps.js';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,7 +26,7 @@ export default function Curso() {
 
     const [videoUrl, setVideoUrl] = useState("")
 
-    const [matricula, setMatricula] =  useState(false)
+    const [matricula, setMatricula] = useState(false)
 
     const [modalBADVisible, setModalBADVisible] = useState(false)
     const [modalLoadingVisible, setModalLoadingVisible] = useState(false)
@@ -36,8 +37,15 @@ export default function Curso() {
 
     const [textResponse, setTextResponse] = useState("")
 
+    const [online, setOnline] = useState(true)
+
+    const [enderecoUsuario, setEnderecoUsuario] = useState("")
+    const [enderecoCurso, setEnderecoCurso] = useState("")
+
     const { getItem } = useStorage();
     const { getLocalhost } = useLocalhost();
+
+    const [durantionInMinutes, setDurationInMinutes] = useState("")
 
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Regular': require('../../../../assets/fonts/Poppins-Regular.ttf'),
@@ -80,6 +88,11 @@ export default function Curso() {
                         setModalBADVisible(true)
                     } else {
                         setCurso(responseJson)
+                        if (responseJson.modalidade == "ONLINE") {
+                            setOnline(true)
+                        } else {
+                            setOnline(false)
+                        }
                     }
                 })
                 .catch((error) => {
@@ -236,7 +249,11 @@ export default function Curso() {
             const data = await response.json();
             setModalLoadingVisible(false)
             if (response.ok) {
-                setTextResponse("Matricula realizada com sucesso! N° de matricula: " + data.numeroMatricula)
+                if(online){
+                    setTextResponse("Matricula realizada com sucesso! N° de matricula: " + data.numeroMatricula)
+                }else if(!online){
+                    setTextResponse("Foi solicitado um pedido de matricula ao professor, verifiquei sua caixa de mensagens!")
+                }
                 setModalOKVisible(true)
             } else if (data.message !== undefined) {
                 setTextResponse(data.message)
@@ -275,25 +292,105 @@ export default function Curso() {
 
     }
 
+    async function getEnderecoUsuario() {
+
+        const localhost = await getLocalhost();
+        const token = await getItem("@token");
+        const usuarioId = await getItem("@id");
+
+        fetch(`http://${localhost}:8080/scireclass/endereco/usuario/${usuarioId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(async (response) => {
+                const data = await response.json();
+                if (response.ok) {
+                    setEnderecoUsuario(data)
+                } else {
+                    setTextResponse(data.message);
+                    setModalBADVisible(true);
+                }
+            }).catch((error) => {
+                console.error('Error:', error);
+            })
+
+    }
+
+    async function getEnderecoCurso() {
+
+        const localhost = await getLocalhost();
+        const token = await getItem("@token");
+
+        fetch(`http://${localhost}:8080/scireclass/endereco/curso/${cursoId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then(async (response) => {
+                const data = await response.json();
+                if (response.ok) {
+                    setEnderecoCurso(data)
+                } else {
+                    setTextResponse(data.message);
+                    setModalBADVisible(true);
+                }
+            }).catch((error) => {
+                console.error('Error:', error);
+            })
+
+    }
+    const handleDirectionsReady = (result) => {
+        setDurationInMinutes(result.duration);
+    };
+
     const handleCloseVideo = () => {
         setModalVideoVisible(false);
         setVideoUrl("")
     };
 
+    useEffect(() => {
+        getEnderecoCurso();
+        getEnderecoUsuario();
+    }, [!online])
+
     return (
         <View onLayout={onLayoutRootView} style={styles.container}>
-            <View style={styles.viewImage}>
-                <Image style={styles.img} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${imagem.path}` }} />
-            </View>
+            {online ?
+                <View style={styles.viewImage}>
+                    <Image style={styles.img} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${imagem.path}` }} />
+                </View> :
+                <View style={styles.mapContainer}>
+                    <Maps enderecoUsuario={`${enderecoUsuario.logradouro}, ${enderecoUsuario.numero} - ${enderecoUsuario.bairro} - ${enderecoUsuario.localidade}`}
+                        enderecoCurso={`${enderecoCurso.logradouro}, ${enderecoCurso.numero} - ${enderecoCurso.bairro} - ${enderecoCurso.localidade}`}
+
+                        handleDirectionsReady={handleDirectionsReady} />
+                </View>
+            }
             <ScrollView style={styles.body}>
                 <View>
                     <View style={styles.titleCurso}>
                         <Text style={styles.textTitleCurso}>{curso.nome}</Text><Text style={styles.priceTitleCurso}>R${curso.valor}</Text>
                     </View>
                     <View style={styles.statsCurso}>
-                        <Text style={styles.timeCurso}>Duracao - {curso.quantidadeAulas} Lições</Text>
+                        {online ?
+                            <Text style={styles.timeCurso}>Duracao - {curso.quantidadeAulas} Lições</Text>
+                            : null}
                         <Text style={styles.avaliacaoCurso}>Avalliação:</Text>
                     </View>
+                    {!online ?
+                        <View style={styles.enderecoBody}>
+                            <Text style={styles.textDistace}>{Math.floor(durantionInMinutes)} minutos de distância</Text>
+                            <View style={styles.userEndereco}>
+                                <Text style={styles.textEndereco}>{enderecoUsuario.logradouro}, {enderecoUsuario.numero} - {enderecoUsuario.bairro} - {enderecoUsuario.localidade}</Text>
+                                <Text style={styles.subtextEndereco}>Casa</Text>
+                            </View>
+                            <View style={styles.userEndereco}>
+                                <Text style={styles.textEndereco}>{enderecoCurso.logradouro}, {enderecoCurso.numero} - {enderecoCurso.bairro} - {enderecoCurso.localidade}</Text>
+                                <Text style={styles.subtextEndereco}>Curso</Text>
+                            </View>
+                        </View> : null
+                    }
                     <View style={styles.aboutCurso}>
                         <Text style={styles.titleAbout}>Sobre este curso</Text>
                         <Text style={styles.textAbout}>{curso.descricao}</Text>
@@ -308,13 +405,12 @@ export default function Curso() {
                                 </View>
                             </View>
                             {matricula ?
-                            <Pressable onPress={() => handleButtonVideo(aula.id)} style={styles.buttonPlay}>
-                                <Image style={styles.buttonImg} source={require("../../../assets/buttonPlay.png")} />
-                            </Pressable> :
-                                 <Image style={styles.buttonImg} source={require("../../../assets/locked.png")} />
+                                <Pressable onPress={() => handleButtonVideo(aula.id)} style={styles.buttonPlay}>
+                                    <Image style={styles.buttonImg} source={require("../../../assets/buttonPlay.png")} />
+                                </Pressable> :
+                                <Image style={styles.buttonImg} source={require("../../../assets/locked.png")} />
                             }
                         </View>
-
                     ))}
                 </View>
             </ScrollView>
@@ -324,7 +420,14 @@ export default function Curso() {
                     :
                     <Image source={require("../../../assets/favoritoIcon.png")} style={styles.iconButtonFav} />}
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handlerBuyCurso} style={styles.buttonBuy}><Text style={styles.textButtonBuy}>Comprar agora</Text></TouchableOpacity>
+
+                <TouchableOpacity onPress={handlerBuyCurso} style={styles.buttonBuy}>
+                    {online ?
+                        <Text style={styles.textButtonBuy}>Comprar agora</Text>
+                        :
+                        <Text style={styles.textButtonBuy}>Tenho Interesse</Text>
+                    }
+                </TouchableOpacity>
             </View>
             <Modal visible={modalOKVisible} animationType='fade' transparent={true}>
                 <ModalOK textOK={textResponse} handleClose={() => setModalOKVisible(false)} />
@@ -484,6 +587,36 @@ const styles = StyleSheet.create({
     buttonImg: {
         width: 44.13,
         height: 44
+    },
+    mapContainer: {
+        height: 276, // Adjust height as needed
+        width: '100%',
+        position: "relative",
+    },
+    enderecoBody: {
+        justifyContent: 'flex-start',
+        padding: 8
+    },
+    textDistace: {
+        fontFamily: 'Poppins-Bold',
+        fontSize: 14,
+        color: '#1F1F39'
+    },
+    userEndereco: {
+        margin: 8
+    },
+    cursoEndereco: {
+        margin: 8
+    },
+    textEndereco: {
+        fontFamily: 'Poppins-Bold',
+        fontSize: 14,
+        color: '#1F1F39'
+    },
+    subtextEndereco: {
+        fontFamily: 'Poppins-Regular',
+        fontSize: 14,
+        color: '#858597'
     }
 
 

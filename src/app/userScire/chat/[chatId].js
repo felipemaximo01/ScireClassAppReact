@@ -1,4 +1,4 @@
-import { useCallback, useState,useRef } from 'react';
+import { useCallback, useState,useRef,useEffect } from 'react';
 import { TouchableOpacity, Image, View, ScrollView, Modal ,TextInput, Text, StyleSheet, Pressable } from "react-native";
 import * as SplashScreen from 'expo-splash-screen';
 import useStorage from "../../hooks/useStorage"
@@ -20,6 +20,8 @@ export default function Chat() {
     const { chatId } = useLocalSearchParams();
 
     const [mensagens, setMensagens] = useState([])
+
+    const [perfil, setPerfil] = useState("")
 
     const [chat,setChat] = useState("");
 
@@ -48,6 +50,16 @@ export default function Chat() {
     if (!fontsLoaded && !fontError) {
         return null;
     }
+
+    useEffect(() => {
+        async function getUserPerfil() {
+            const getPerfil = await getItem("@perfil")
+            if (getPerfil !== null && getPerfil !== undefined && getPerfil !== "") {
+                setPerfil(getPerfil)
+            }
+        };
+        getUserPerfil();
+    }, [])
 
     async function getChat(){
         const localhost = await getLocalhost();
@@ -109,8 +121,6 @@ export default function Chat() {
         const token = await getItem("@token");
         const usuarioId = await getItem("@id");
 
-        console.log(token);
-
         const mensagemDTO = {
             id: null,
             mensagens: textMensagem,
@@ -133,6 +143,32 @@ export default function Chat() {
             if(response.ok){
                 setTextMensagem("");
                 getMensagens();
+            }else{
+                setTextResponse(data.message)
+            }
+        })
+    }
+
+    async function ativaMatricula(){
+
+        const localhost = await getLocalhost();
+        const token = await getItem("@token");
+        setModalLoadingVisible(true)
+
+        fetch(`http://${localhost}:8080/scireclass/matricula/ativa/${chat.cursoId}/${chat.usuarioId}/${chatId}`,{
+            method:'post',
+            headers:{
+                "Content-type": "application/json",
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        })
+        .then(async (response) =>{
+            const data = await response.json();
+            setModalLoadingVisible(false)
+            if(response.ok){
+                setTextResponse("Matricula ativa com sucesso!")
+                setModalOKVisible(true)
             }else{
                 setTextResponse(data.message)
             }
@@ -180,7 +216,12 @@ export default function Chat() {
                     </Pressable>
                 </Link>
                 <Image style={styles.img} source={require("../../../assets/fundo.png")} />
-                <Text style={styles.namePerson}>{chat.usuario}</Text>
+                <Text style={styles.namePerson}>{chat.usuario}</Text>   
+                {perfil == "PROFESSOR" ?
+                <TouchableOpacity style={{marginLeft: 20}} onPress={ativaMatricula}>
+                    <Text style={{fontFamily:'Poppins-Bold', color:'#fff'}}>Ativar Matricula</Text>
+                </TouchableOpacity> : null
+                }
             </View>
             <ScrollView ref={scrollViewRef}
             onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
