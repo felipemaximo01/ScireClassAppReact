@@ -226,6 +226,7 @@ export default function Procurar() {
   }
 
   function renderFavoriteIcon(cursoId) {
+    
     const isFavorite = cursosFav.some(cursoFav => cursoFav.id === cursoId);
     return (
       <Image

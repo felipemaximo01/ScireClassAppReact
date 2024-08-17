@@ -129,6 +129,16 @@ export default function Layout() {
                 headerShown: false,
                 href: null
             }} />
+            <Tabs.Screen name='editarPerfil' options={{
+                title: "Editar Perfil",
+                headerShown: false,
+                href: null
+            }} />
+            <Tabs.Screen name='certificados' options={{
+                title: "Editar Perfil",
+                headerShown: false,
+                href: null
+            }} />
         </Tabs>
     )
 }

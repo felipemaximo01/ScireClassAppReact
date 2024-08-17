@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Pressable, Image, ScrollView } from "react-native";
 import { useEffect, useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import Slider from "@react-native-community/slider";
@@ -112,15 +112,19 @@ export function ModalFilter({ handleClose, onApplyFilters, initialFilters }) {
                 <Pressable onPress={handleClose} style={styles.imgs} ><Image style={styles.imgCard} source={require("../../../assets/close.png")} /></Pressable>
                 <Text style={styles.title}>Filtro de pesquisa</Text>
                 <View style={styles.areaCategoria}><Text style={styles.textCategoria}>Categorias</Text></View>
+
                 <View style={styles.categorias}>
-                    {categorias?.map((categoria, i) => (
-                        <Pressable key={i} onPress={() => toggleCategoria(categoria.id)}>
-                            <Text style={[styles.textCategorias, isCategoriaSelecionada(categoria.id) && styles.textCategoriasSelecionada]}>
-                                {categoria.nome}
-                            </Text>
-                        </Pressable>
-                    ))}
+                    <ScrollView  horizontal={true}>
+                        {categorias?.map((categoria, i) => (
+                            <Pressable key={i} onPress={() => toggleCategoria(categoria.id)}>
+                                <Text style={[styles.textCategorias, isCategoriaSelecionada(categoria.id) && styles.textCategoriasSelecionada]}>
+                                    {categoria.nome}
+                                </Text>
+                            </Pressable>
+                        ))}
+                    </ScrollView>
                 </View>
+
                 <View style={styles.viewDuracao}>
                     <Text style={styles.titlePreco}>Duração</Text>
                     <View style={styles.alinhamento}>
@@ -194,10 +198,10 @@ export function ModalFilter({ handleClose, onApplyFilters, initialFilters }) {
                             trackStyle={{
                                 height: 4, // Adjust the height of the track
                             }}
-                            selectedStyle={{ 
+                            selectedStyle={{
                                 backgroundColor: '#3D5CFF',
-                              }}
-                            unselectedStyle={{ 
+                            }}
+                            unselectedStyle={{
                                 backgroundColor: '#B8B8D2',
                             }}
                         />
@@ -299,7 +303,7 @@ const styles = StyleSheet.create({
     },
     precos: {
         flexDirection: "row",
-        justifyContent:'center'
+        justifyContent: 'center'
     },
     interact: {
         height: "100%",

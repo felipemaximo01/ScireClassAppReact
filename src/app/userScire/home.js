@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Pressable, Image, Modal } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { useRouter, Link,useFocusEffect } from 'expo-router'
+import { useRouter, Link, useFocusEffect } from 'expo-router'
 import useStorage from "../hooks/useStorage"
 import useLocalhost from "../hooks/useLocalhost"
 import { ModalBAD } from '../componentes/modal/modalBAD';
@@ -100,33 +100,31 @@ export default function Home() {
     loadLocalhost()
   }, [])
 
-  useEffect(() => {
-    async function userById() {
-      if (token !== null && id !== null) {
-        setModalLoadingVisible(true)
-        fetch(`http://${localhost}:8080/scireclass/usuario/findbyid/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
+
+  async function userById() {
+    if (token !== null && id !== null) {
+      setModalLoadingVisible(true)
+      fetch(`http://${localhost}:8080/scireclass/usuario/findbyid/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then((response) => response.json())
+        .then(async (responseJson) => {
+          setModalLoadingVisible(false)
+          if (responseJson.message !== undefined) {
+            setTextResponse(responseJson.message)
+            setModalBADVisible(true)
+          } else {
+            setUsuarioDTO(responseJson)
           }
         })
-          .then((response) => response.json())
-          .then(async (responseJson) => {
-            setModalLoadingVisible(false)
-            if (responseJson.message !== undefined) {
-              setTextResponse(responseJson.message)
-              setModalBADVisible(true)
-            } else {
-              setUsuarioDTO(responseJson)
-            }
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-      }
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    }
 
-    };
-    userById();
-  }, [token, id])
+  };
 
   async function getMinutosAssitidos() {
     if (token !== null && id !== null) {
@@ -156,7 +154,8 @@ export default function Home() {
   useFocusEffect(
     useCallback(() => {
       lastCursosUser();
-      getMinutosAssitidos()
+      getMinutosAssitidos();
+      userById();
     }, [token, id])
   )
 
@@ -177,7 +176,7 @@ export default function Home() {
           <Text style={styles.titleText}>Oi, {usuarioDTO.nome}</Text>
           <Text style={styles.subTitleText}>Vamos começar a aprender!</Text>
         </View><Link asChild href={"userScire/conta"}>
-        <Pressable><Image source={require("../../assets/userIcon.png")} style={styles.userIcon} /></Pressable></Link>
+          <Pressable><Image source={require("../../assets/userIcon.png")} style={styles.userIcon} /></Pressable></Link>
       </View>
       <View style={[styles.titleContent, styles.elevation]}>
         <View style={styles.textTitleContent}>

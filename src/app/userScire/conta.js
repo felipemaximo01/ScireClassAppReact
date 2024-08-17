@@ -24,8 +24,8 @@ export default function Conta() {
         <View onLayout={onLayoutRootView} style={styles.container}>
             <Text style={styles.title}>Conta</Text>
             <View style={styles.conteinerimg} ><Image style={styles.imagem} source={require("../../assets/userIcon.png")} /></View>
-            <View ><Text style={styles.opcoes}>Certificados</Text></View>
-            <View><Text style={styles.opcoes}>Editar conta</Text></View>
+            <Link href={"userScire/certificados"}> <View ><Text style={styles.opcoes}>Certificados</Text></View></Link>
+            <Link href={"userScire/editarPerfil"}><View><Text style={styles.opcoes}>Editar conta</Text></View></Link>
             <Link href={"userScire/homeProfessor"}><View><Text style={styles.opcoes}>Configuração de Privacidade</Text></View></Link>
             <Link href={"userScire/cursosCriados"}><View><Text style={styles.opcoes}>Ajuda</Text></View></Link>
 

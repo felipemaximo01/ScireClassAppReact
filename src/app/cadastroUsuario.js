@@ -23,6 +23,7 @@ export default function CadastraUsuario(){
     const [nome, setNome] = useState("");
     const [senha, setSenha] = useState("");
     const [email, setEmail] = useState("");
+    const [cpf,setCpf] = useState("")
     const [aceitouTermos, setAceitouTermos] = useState(false);
     const [cep,setCep] = useState("")
     const [numero,setNumero] = useState("")
@@ -66,7 +67,7 @@ export default function CadastraUsuario(){
 
       const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
 
-      if(!nome.trim() || !senha.trim() || !email.trim() || !cep.trim() || !numero.trim()){
+      if(!nome.trim() || !senha.trim() || !email.trim() || !cep.trim() || !numero.trim() || !cpf.trim()){
         setTextResponse("Todos os campos precisam ser preenchidos!")
         setModalBADVisible(true)
         return
@@ -91,6 +92,7 @@ export default function CadastraUsuario(){
         nome: nome,
         senha:senha,
         email:email,
+        cpf:cpf,
         aceitouTermos: aceitouTermos,
         perfil:perfil,
         ativo: false
@@ -177,6 +179,8 @@ export default function CadastraUsuario(){
                     </RadioButtonGroup>
                     <Text style={styles.formText}>Nome</Text>
                     <TextInput onChangeText={(value) => setNome(value)} style={styles.formInput}/>
+                    <Text style={styles.formText}>Cpf</Text>
+                    <TextInput onChangeText={(value) => setCpf(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>Senha</Text>
                     <TextInput secureTextEntry={true} onChangeText={(value) => setSenha(value)} style={styles.formInput}/>
                     <Text value={email} style={styles.formText}>Seu Email</Text>

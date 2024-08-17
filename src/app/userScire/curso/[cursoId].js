@@ -182,26 +182,27 @@ export default function Curso() {
         favoritado();
     }, [cursoId])
 
+    const matriculado = async () => {
+        const localhost = await getLocalhost();
+        const token = await getItem("@token");
+        const usuarioId = await getItem("@id");
+        fetch(`http://${localhost}:8080/scireclass/matricula/findalunoandcurso/${usuarioId}/${cursoId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }).then(async (response) => {
+            const data = await response.json();
+            if (response.ok) {
+                setMatricula(true);
+            } else if (data.message !== undefined) {
+                setMatricula(false)
+            }
+        }).catch((error) => {
+            console.log(error);
+        })
+    };
+
     useEffect(() => {
-        const matriculado = async () => {
-            const localhost = await getLocalhost();
-            const token = await getItem("@token");
-            const usuarioId = await getItem("@id");
-            fetch(`http://${localhost}:8080/scireclass/matricula/findalunoandcurso/${usuarioId}/${cursoId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }).then(async (response) => {
-                const data = await response.json();
-                if (response.ok) {
-                    setMatricula(true);
-                } else if (data.message !== undefined) {
-                    setMatricula(false)
-                }
-            }).catch((error) => {
-                console.log(error);
-            })
-        };
         matriculado();
     }, [cursoId])
 
@@ -253,6 +254,7 @@ export default function Curso() {
             if (response.ok) {
                 if (online) {
                     setTextResponse("Matricula realizada com sucesso! N° de matricula: " + data.numeroMatricula)
+                    matriculado();
                 } else if (!online) {
                     setTextResponse("Foi solicitado um pedido de matricula ao professor, verifiquei sua caixa de mensagens!")
                 }
@@ -279,7 +281,6 @@ export default function Curso() {
             .then(async (response) => {
                 const data = await response.json();
                 if (response.ok) {
-                    console.log(data)
                     setVideoUrl(`http://${localhost}:8080/scireclass/video/downloadvideo?path=${data.path}`)
                     setModalVideoVisible(true)
                 } else {
