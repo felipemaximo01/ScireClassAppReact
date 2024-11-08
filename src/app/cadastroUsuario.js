@@ -9,6 +9,8 @@ import useLocalhost from "./hooks/useLocalhost"
 import { ModalOK } from './componentes/modal/modalOK';
 import { ModalBAD } from './componentes/modal/modalBAD';
 import { ModalLoading } from './componentes/modal/modalLoading';
+import { Picker } from '@react-native-picker/picker';
+import { useFocusEffect } from 'expo-router'
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,6 +33,7 @@ export default function CadastraUsuario(){
     const [bairro, setBairro] = useState("")
     const [localidade, setLocalidade] = useState("")
     const [uf, setUf] = useState("")
+    const [categoriaId, setCategoriaId] = useState("");
 
     const [modalOKVisible,setModalOKVisible] = useState(false)
     const [modalBADVisible,setModalBADVisible] = useState(false)
@@ -38,6 +41,9 @@ export default function CadastraUsuario(){
     const [textResponse,setTextResponse] = useState("")
 
     const [modalLoadingVisible, setModalLoadingVisible]= useState(false)
+
+    
+    const [categorias, setCategorias] = useState([])
 
 
     const[fontsLoaded,fontError] = useFonts({
@@ -67,7 +73,7 @@ export default function CadastraUsuario(){
 
       const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
 
-      if(!nome.trim() || !senha.trim() || !email.trim() || !cep.trim() || !numero.trim() || !cpf.trim()){
+      if(!nome.trim() || !senha.trim() || !email.trim() || !cep.trim() || !numero.trim() || !cpf.trim() || !categoriaId.trim()){
         setTextResponse("Todos os campos precisam ser preenchidos!")
         setModalBADVisible(true)
         return
@@ -106,9 +112,14 @@ export default function CadastraUsuario(){
         uf: uf
       }
 
+      const categoriaDTO = {
+        id: categoriaId
+      }
+
       const cadastroDTO = {
         usuarioDTO: usuarioDTO,
-        enderecoDTO: enderecoDTO
+        enderecoDTO: enderecoDTO,
+        categoriaDTO : categoriaDTO
       }
 
       fetch(`http://${localhost}:8080/scireclass/usuario/save`,{
@@ -156,10 +167,34 @@ export default function CadastraUsuario(){
       }
     }
 
+    async function getCategorias() {
+      const localhost = await getLocalhost();
+      fetch(`http://${localhost}:8080/scireclass/categoria`, {
+        method: 'GET',
+      }
+      ).then(async (response) => {
+        const data = await response.json();
+        if (response.ok) {
+          setCategorias(data);
+        } else {
+          setTextResponse(data.message)
+          setModalBADVisible(true)
+        }
+      }).catch((error) => {
+        console.log(error);
+      })
+    }
+
     const handleClose = () => {
       setModalOKVisible(false);
       router.replace("/login");
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      getCategorias();
+    },[])
+  )
 
     return(
         <ScrollView>
@@ -189,6 +224,13 @@ export default function CadastraUsuario(){
                     <TextInput keyboardType='phone-pad' value={cep} onBlur={checkCEP} onChangeText={(value) => setCep(value)} style={styles.formInput}/>
                     <Text style={styles.formText}>N° residencial</Text>
                     <TextInput keyboardType='phone-pad' onChangeText={(value) => setNumero(value)} style={styles.formInput}/>
+                    <Text style={styles.formText}>Que tipo de curso você busca ?</Text>
+                    <Picker selectedValue={categoriaId} onValueChange={(itemValue, itemIndex) => { setCategoriaId(itemValue) }}>
+                      <Picker.Item label="Escolha uma categoria" value="" />
+                      {categorias?.map((categoria, i) => (
+                        <Picker.Item label={categoria.nome} value={categoria.id} key={i} />
+                      ))}
+                     </Picker>
                     <View style={{flexDirection:'row'}}>
                         <Checkbox value={aceitouTermos} onValueChange={setAceitouTermos} style={styles.checkBox}/> 
                         <Text style={styles.formText}>Ao criar uma conta você tem que concordar com nossos termos e condição.</Text>

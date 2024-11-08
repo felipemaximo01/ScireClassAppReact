@@ -20,9 +20,18 @@ const useStorage = () => {
         }
     }
 
+    const clearItens = async () => {
+        try {
+          await AsyncStorage.clear();
+        } catch (error) {
+          console.error('Erro ao limpar AsyncStorage:', error);
+        }
+      };
+
     return {
         getItem,
         saveItem,
+        clearItens
     }
 }
 

@@ -35,3 +35,9 @@ yarn-error.*
 *.tsbuildinfo
 
 src/app/hooks/useLocalhost.js
+
+google-services.json
+
+android
+
+eas.json

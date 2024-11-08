@@ -10,6 +10,8 @@ import { ModalLoading } from '../componentes/modal/modalLoading';
 import useStorage from "../hooks/useStorage"
 import { useRouter, useFocusEffect } from 'expo-router';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
+import analytics from '@react-native-firebase/analytics';
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,7 +33,7 @@ export default function Procurar() {
   const [filters, setFilters] = useState({
     categorias: [],
     precoMin: 0,
-    precoMax: 1000,
+    precoMax: 10000,
     duracao: '',
     distancia: 0,
   });
@@ -236,6 +238,16 @@ export default function Procurar() {
     );
   }
 
+  function carregarNome(nome) {
+    if (nome != null && nome != undefined) {
+        if (nome.length > 21) {
+            return nome.substr(0, 21) + "...";
+        }
+        return nome
+    }
+    return "";
+}
+
   return (
     <ScrollView>
       <View onLayout={onLayoutRootView} style={styles.form}>
@@ -275,7 +287,7 @@ export default function Procurar() {
                 {renderFavoriteIcon(curso.id)}
                 </Pressable>
                 <Image style={styles.imgCard} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
-                <Text style={styles.cardTextTitle}>{curso.nome}</Text>
+                <Text style={styles.cardTextTitle}>{carregarNome(curso.nome)}</Text>
                 <Text style={styles.cardText}>{curso.nomeCriador}</Text>
                 <StarRatingDisplay starStyle={{}} style={styles.cardStar} starSize={12} rating={curso.avaliacao}/>
                 <Text style={styles.cardTextPrice}>R${curso.valor}</Text>
@@ -329,8 +341,8 @@ const styles = StyleSheet.create({
     zIndex: 5
   },
   imgFavNot: {
-    width: 27,
-    height: 25,
+    width: 29,
+    height: 25.83,
     position: 'absolute',
     margin: 0,
     right: 0,

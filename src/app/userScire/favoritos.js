@@ -114,6 +114,16 @@ export default function Favoritos() {
     }, [])
   )
 
+  function carregarNome(nome) {
+    if (nome != null && nome != undefined) {
+        if (nome.length > 21) {
+            return nome.substr(0, 21) + "...";
+        }
+        return nome
+    }
+    return "";
+}
+
   return (
     <View onLayout={onLayoutRootView} style={styles.container}>
       <View style={styles.title}>
@@ -125,7 +135,7 @@ export default function Favoritos() {
               <Image style={styles.img} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
             </View>
             <View>
-              <Text style={styles.titleCurso}>{curso.nome}</Text>
+              <Text style={styles.titleCurso}>{carregarNome(curso.nome)}</Text>
               <View style={styles.contentTeacher}>
                 <Image style={styles.user} source={require("../../assets/Union.png")} />
                 <Text style={styles.nameTeacher}>{curso.nomeCriador}</Text>
@@ -135,7 +145,7 @@ export default function Favoritos() {
                 <Text style={styles.textHours}>{curso.minutosTotalCurso} min</Text>
               </View>
             </View>
-            <Pressable onPress={() => handlerFavCurso(curso.id)}>
+            <Pressable style={{height: 25.83, width: 29, marginLeft: 50}} onPress={() => handlerFavCurso(curso.id)}>
               <Image style={styles.fav} source={require("../../assets/favoritoIcon.png")} />
             </Pressable>
             <View>
@@ -226,9 +236,8 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
   },
   fav: {
-    height: 17.83,
-    width: 20,
-    marginLeft: "60%"
+    height: 25.83,
+    width: 29
   },
 
 

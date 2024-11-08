@@ -66,7 +66,7 @@ export function ModalFilter({ handleClose, onApplyFilters, initialFilters }) {
         onApplyFilters({
             categorias: [],
             precoMin: 0,
-            precoMax: 1000,
+            precoMax: 10000,
             duracao: '',
             distancia: 0,
         });

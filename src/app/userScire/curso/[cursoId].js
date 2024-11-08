@@ -10,6 +10,7 @@ import { ModalLoading } from '../../componentes/modal/modalLoading';
 import { VideoScreen } from '../../componentes/video.js'
 import { Maps } from '../../componentes/maps.js';
 import { ModalAvaliacao } from '../../componentes/modal/modalAvaliacao.js';
+import analytics from '@react-native-firebase/analytics';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -102,6 +103,56 @@ export default function Curso() {
                 });
         }
         cursoById();
+    }, [cursoId])
+
+    useEffect(() => {
+        async function logCourseView() {
+
+            const usuarioId = await getItem("@id");
+
+            await analytics().logEvent('course_view', {
+              course_id: usuarioId,
+              user_id: cursoId,
+              timestamp: new Date().toISOString(),
+            });
+
+            await analytics().setAnalyticsCollectionEnabled(true);
+          }
+
+          async function logCourseViewInBackEnd() {
+
+            const usuarioId = await getItem("@id");
+            const token = await getItem("@token");
+            const localhost = await getLocalhost();
+
+            const userView = {
+                usuario : usuarioId,
+                curso : cursoId,
+                data: new Date().toISOString()
+            }
+            fetch(`http://${localhost}:8080/scireclass/userview`, {
+                method: "post",
+                body: JSON.stringify(userView),
+                headers:{
+                    "Content-type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`
+                  }
+            }
+            )
+            .then((response) => response.json() )
+            .then(async (responseJson) => {
+              setModalLoadingVisible(false)
+              if(responseJson.message !== undefined){
+              }else{
+              }
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+            });
+          }
+          logCourseView();
+          logCourseViewInBackEnd();
     }, [cursoId])
 
     useEffect(() => {
@@ -501,7 +552,9 @@ const styles = StyleSheet.create({
     textTitleCurso: {
         color: "#1F1F39",
         fontFamily: "Poppins-Bold",
-        fontSize: 20
+        fontSize: 20,
+        maxWidth: "90%"
+        
     },
     priceTitleCurso: {
         color: "#3D5CFF",
