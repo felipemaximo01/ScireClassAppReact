@@ -1,4 +1,4 @@
-import { useCallback,useEffect,useState } from 'react';
+import { useCallback,useEffect,useState,AppRegistry } from 'react';
 import { StyleSheet, Text, View, Image,TouchableOpacity } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -6,7 +6,10 @@ import {Link,Redirect } from 'expo-router'
 import AppIntroSlider from 'react-native-app-intro-slider';
 import useStorage from './hooks/useStorage';
 import 'text-encoding';
-
+import useNotification from './hooks/useNotification';
+import messaging from '@react-native-firebase/messaging';
+import {name as appName} from '../../app.json'
+import { registerRootComponent } from 'expo';
 
 const slides = [
   {
@@ -34,7 +37,17 @@ const slides = [
 
 SplashScreen.preventAutoHideAsync();
 
+messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+  console.log('Mensagem recebida em background:', remoteMessage);
+});
+
+
 export default function Page1() {
+  useEffect(() => {
+    useNotification();
+}, []);
+
+
   const [showHome,setShowHome] = useState(false);
   const [showHomeProfessor,setShowHomeProfessor] = useState(false);
   const {getItem} = useStorage();
@@ -121,6 +134,9 @@ export default function Page1() {
   }
   
 }
+
+registerRootComponent(Page1);
+
 
 const styles = StyleSheet.create({
   container: {

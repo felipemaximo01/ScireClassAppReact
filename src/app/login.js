@@ -80,7 +80,11 @@ export default function Login(){
             await saveItem("@token",responseJson.token)
             await saveItem("@id",responseJson.id)
             await saveItem("@perfil",responseJson.perfil)
-            router.replace("/userScire/home")
+            if(responseJson.perfil == 'ALUNO'){
+              router.replace("/userScire/home")
+            }else{
+              router.replace("/userScire/homeProfessor")
+            }
           }
         })
         .catch((error) => {

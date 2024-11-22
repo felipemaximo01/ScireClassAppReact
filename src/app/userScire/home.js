@@ -10,6 +10,7 @@ import { ModalLoading } from '../componentes/modal/modalLoading';
 import * as Progress from 'react-native-progress';
 import PagerView from 'react-native-pager-view';
 import {StarRatingDisplay} from 'react-native-star-rating-widget';
+import messaging from '@react-native-firebase/messaging';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -56,6 +57,28 @@ export default function Home() {
   if (!fontsLoaded && !fontError) {
     return null;
   }
+
+  useEffect(() => {
+    async function saveFcmToken() {
+        if (token !== null && id !== null) {
+        const fmcToken = await messaging().getToken();
+        fetch(`http://${localhost}:8080/scireclass/usuario/fcmToken/${fmcToken}/${id}`, {
+          headers: {
+            method: "post",
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(
+          console.log("salvou: " + fmcToken)
+        )
+        .catch((error) => {
+          console.log(error);
+        })
+      }
+  }
+  saveFcmToken()
+  }, [token,id])
+
 
   async function lastCursosUser() {
     if (token !== null && id !== null) {
@@ -261,7 +284,7 @@ export default function Home() {
           <PagerView ref={pagerRef} style={[{ flex: 1,width: "100%",height:"100%",alignItems:'center', justifyContent: "center"}]}>
             {cursosRecomendados?.map((curso, i) => (
             <View style={[styles.card,styles.elevation]} key={i}>
-              <Image style={styles.imgCard} source={require("../../assets/imagemExCurso.png")} />
+              <Image style={styles.imgCard} source={{ uri: `http://${localhost}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
               <View style={{padding: 6}}>
                 <Text style={styles.titleCurso}>{carregarNome(curso.nome)}</Text>
                 <View style={styles.contentTeacher}>
@@ -443,7 +466,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 12,
     width: "90%",
-    height: 133,
     backgroundColor: "#FFFFFF",
     padding: 8
   },

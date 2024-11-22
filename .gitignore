@@ -36,8 +36,7 @@ yarn-error.*
 
 src/app/hooks/useLocalhost.js
 
-google-services.json
-
-android
+android/
 
 eas.json
+google-services.json

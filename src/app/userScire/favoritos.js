@@ -134,7 +134,7 @@ export default function Favoritos() {
             <View style={styles.viewImagem}>
               <Image style={styles.img} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
             </View>
-            <View>
+            <View style={{width:"60%"}}>
               <Text style={styles.titleCurso}>{carregarNome(curso.nome)}</Text>
               <View style={styles.contentTeacher}>
                 <Image style={styles.user} source={require("../../assets/Union.png")} />
@@ -145,7 +145,7 @@ export default function Favoritos() {
                 <Text style={styles.textHours}>{curso.minutosTotalCurso} min</Text>
               </View>
             </View>
-            <Pressable style={{height: 25.83, width: 29, marginLeft: 50}} onPress={() => handlerFavCurso(curso.id)}>
+            <Pressable style={{width:"15%",flexDirection: 'row' ,justifyContent:"flex-end"}} onPress={() => handlerFavCurso(curso.id)}>
               <Image style={styles.fav} source={require("../../assets/favoritoIcon.png")} />
             </Pressable>
             <View>

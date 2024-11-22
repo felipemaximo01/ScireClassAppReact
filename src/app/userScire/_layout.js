@@ -12,6 +12,8 @@ export default function Layout() {
     const [professor, setProfessor] = useState(null)
     const [homeProfessor, setHomeProfessor] = useState(null)
     const [homeAluno, setHomeAluno] = useState(null)
+    const [cursosProf, setCursosProf] = useState(null)
+    const [cursosAluno, setCursosAluno] = useState(null)
 
     useEffect(() => {
         async function getUserPerfil() {
@@ -28,9 +30,11 @@ export default function Layout() {
             if (perfil == "ALUNO") {
                 setAluno("/userScire/favoritos")
                 setHomeAluno("/userScire/home")
+                setCursosAluno("/userScire/meusCursos")
             } else if (perfil == "PROFESSOR") {
                 setProfessor("/userScire/cadastrarCurso")
                 setHomeProfessor("/userScire/homeProfessor")
+                setCursosProf("/userScire/cursosCriados")
             }
         }
         setProfile()
@@ -39,8 +43,7 @@ export default function Layout() {
     return (
         <Tabs screenOptions={({ route }) => ({
             headerShown: false, tabBarHideOnKeyboard: true, tabBarStyle: {
-                display: route.name === 'curso/[cursoId]' || route.name === 'chat/[chatId]' ? 'none' : 'flex'
-                
+                display: route.name === 'curso/[cursoId]' || route.name === 'chat/[chatId]' || route.name === 'gerenciarAlunos/[cursoId]' ? 'none' : 'flex'            
             }
         })}>
             <Tabs.Screen name='home' options={{
@@ -65,6 +68,16 @@ export default function Layout() {
             <Tabs.Screen name='meusCursos' options={{
                 title: "Cursos",
                 headerShown: false,
+                href: cursosAluno,
+                tabBarIcon: () => {
+                    return <Image source={require("../../assets/meusCursosIcon.png")}
+                        style={styles.imgCursos} />
+                }
+            }} />
+            <Tabs.Screen name='cursosCriados' options={{
+                title: "Cursos Criados",
+                headerShown: false,
+                href: cursosProf,
                 tabBarIcon: () => {
                     return <Image source={require("../../assets/meusCursosIcon.png")}
                         style={styles.imgCursos} />
@@ -114,13 +127,8 @@ export default function Layout() {
                 headerShown: false,
                 href: null
             }} />
-            <Tabs.Screen name='gerenciarAlunos' options={{
+            <Tabs.Screen name='gerenciarAlunos/[cursoId]' options={{
                 title: "Gerenciar Alunos",
-                headerShown: false,
-                href: null
-            }} />
-            <Tabs.Screen name='cursosCriados' options={{
-                title: "Cursos Criados",
                 headerShown: false,
                 href: null
             }} />
@@ -136,6 +144,11 @@ export default function Layout() {
             }} />
             <Tabs.Screen name='certificados' options={{
                 title: "Editar Perfil",
+                headerShown: false,
+                href: null
+            }} />
+            <Tabs.Screen name='editarCurso/[cursoId]' options={{
+                title: "Editar Curso",
                 headerShown: false,
                 href: null
             }} />

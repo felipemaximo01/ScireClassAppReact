@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Pressable, Image, Modal } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Pressable, Image, Modal,ScrollView } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useRouter, Link } from 'expo-router'
@@ -9,7 +9,7 @@ import { ModalBAD } from '../componentes/modal/modalBAD';
 import { ModalLoading } from '../componentes/modal/modalLoading';
 import * as Progress from 'react-native-progress';
 import { useFocusEffect } from 'expo-router';
-
+import messaging from '@react-native-firebase/messaging';
 
 
 SplashScreen.preventAutoHideAsync();
@@ -26,8 +26,8 @@ export default function HomeProfessor() {
   const [localhost, setLocahost] = useState("");
 
   const [usuarioDTO, setUsuarioDTO] = useState("");
-
-  const [lastCursos, setLastCursos] = useState([]);
+''
+  const [meusAlunos, setMeusAlunos] = useState([]);
 
   const [modalBADVisible, setModalBADVisible] = useState(false)
 
@@ -53,10 +53,31 @@ export default function HomeProfessor() {
     return null;
   }
 
-  async function lastCursosUser() {
+  useEffect(() => {
+    async function saveFcmToken() {
+        if (token !== null && id !== null) {
+        const fmcToken = await messaging().getToken();
+        fetch(`http://${localhost}:8080/scireclass/usuario/fcmToken/${fmcToken}/${id}`, {
+          headers: {
+            method: "GET",
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(
+          console.log("salvou: " + fmcToken)
+        )
+        .catch((error) => {
+          console.log(error);
+        })
+      }
+  }
+  saveFcmToken()
+  }, [token,id])
+
+  async function lastAlunosUser() {
     if (token !== null && id !== null) {
       setModalLoadingVisible(true)
-      fetch(`http://${localhost}:8080/scireclass/matricula/curso/${id}`, {
+      fetch(`http://${localhost}:8080/scireclass/matricula/meusAlunos/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -68,7 +89,7 @@ export default function HomeProfessor() {
             setTextResponse(responseJson.message)
             setModalBADVisible(true)
           } else {
-            setLastCursos(responseJson)
+            setMeusAlunos(responseJson)
           }
         })
         .catch((error) => {
@@ -129,10 +150,10 @@ export default function HomeProfessor() {
     userById();
   }, [token, id])
 
-  async function getMinutosAssitidos() {
+  async function getQuantidadeAlunos() {
     if (token !== null && id !== null) {
       setModalLoadingVisible(true)
-      fetch(`http://${localhost}:8080/scireclass/minutosAssistidos/${id}`, {
+      fetch(`http://${localhost}:8080/scireclass/matricula/quantidade/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -144,7 +165,7 @@ export default function HomeProfessor() {
             setTextResponse(responseJson.message)
             setModalBADVisible(true)
           } else {
-            setMinutosAssitidos(responseJson.minutos)
+            setMinutosAssitidos(responseJson)
           }
         })
         .catch((error) => {
@@ -156,8 +177,8 @@ export default function HomeProfessor() {
 
   useFocusEffect(
     useCallback(() => {
-      lastCursosUser();
-      getMinutosAssitidos()
+      lastAlunosUser();
+      getQuantidadeAlunos()
     }, [token, id])
   )
 
@@ -172,6 +193,7 @@ export default function HomeProfessor() {
   }
 
   return (
+    <ScrollView>
     <View onLayout={onLayoutRootView} style={styles.container}>
       <View style={styles.title}>
         <View style={styles.textContainer}>
@@ -207,15 +229,11 @@ export default function HomeProfessor() {
       </View>
       <View style={[styles.lastClass, styles.elevation]}>
         <Text style={styles.titleLastClass}>Meus alunos</Text>
-        {lastCursos?.map((curso, i) => (
+        {meusAlunos?.map((aluno, i) => (
           <View key={i} style={styles.lastCourses}>
             <View style={{ flexDirection: "row" }}>
-              <Progress.Circle size={25} progress={curso.quantidadeAulasAssistidas / carregarQuantidadeAulas(curso.quantidadeAulas)} thickness={4} borderWidth={0} color='#707070' fill='none' />
-              <Text style={styles.nameLastCourse}>{curso.nome}</Text>
-            </View>
-            <View style={{ flexDirection: "row", }}>
-              <Text style={styles.numberDoneLastCourse}>{curso.quantidadeAulasAssistidas}</Text>
-              <Text style={styles.numberClassesLastCourse}>/{curso.quantidadeAulas}</Text>
+
+              <Text style={styles.nameLastCourse}>{aluno.nome}</Text>
             </View>
           </View>
         ))}
@@ -227,6 +245,7 @@ export default function HomeProfessor() {
         <ModalLoading />
       </Modal>
     </View>
+    </ScrollView>
   )
 
 }
@@ -364,7 +383,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderRadius: 12,
     width: "90%",
-    height: 133,
     backgroundColor: "#FFFFFF",
     padding: 8
   },

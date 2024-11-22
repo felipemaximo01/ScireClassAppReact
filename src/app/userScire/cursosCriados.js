@@ -2,10 +2,28 @@ import { useCallback, useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, View, Pressable, Image, Modal, TextInput } from 'react-native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { useRouter, Link } from 'expo-router'
+import { useRouter, Link,useFocusEffect } from 'expo-router'
+import { ModalOK } from '../componentes/modal/modalOK';
+import { ModalBAD } from '../componentes/modal/modalBAD';
+import { ModalLoading } from '../componentes/modal/modalLoading';
+import useLocalhost from "../hooks/useLocalhost";
+import useStorage from "../hooks/useStorage";
 
 
 export default function CursosCriados() {
+    const router = useRouter();
+    
+  const [cursos, setCursos] = useState([])
+
+  const { getLocalhost } = useLocalhost();
+  const { getItem } = useStorage();
+
+  const [modalBADVisible, setModalBADVisible] = useState(false)
+  const [modalLoadingVisible, setModalLoadingVisible] = useState(false)
+  const [modalOKVisible, setModalOKVisible] = useState(false)
+  const [textResponse, setTextResponse] = useState("")
+  const [imageUrl, setImageUrl] = useState("");
+
     const [fontsLoaded, fontError] = useFonts({
         'Poppins-Regular': require('../../../assets/fonts/Poppins-Regular.ttf'),
         'Poppins-Bold': require('../../../assets/fonts/Poppins-Bold.ttf'),
@@ -21,6 +39,12 @@ export default function CursosCriados() {
     if (!fontsLoaded && !fontError) {
         return null;
     }
+
+    async function loadLocalhost() {
+        const host = await getLocalhost();
+        setImageUrl(host);
+      }
+    
 
     function showClearText(text) {
         if (text.length > 0) {
@@ -48,6 +72,58 @@ export default function CursosCriados() {
         }
     };
 
+    async function getCursos() {
+        setModalLoadingVisible(true)
+        const localhost = await getLocalhost();
+        const token = await getItem("@token");
+        const usuarioId = await getItem("@id");
+    
+        fetch(`http://${localhost}:8080/scireclass/curso/criador/${usuarioId}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }).then(async (response) => {
+          const data = await response.json();
+          setModalLoadingVisible(false)
+          if (response.ok) {
+            setCursos(data)
+          } else {
+            setTextResponse(data.message)
+            setModalBADVisible(true)
+          }
+        }).catch((error) => {
+          console.error('Error:', error);
+          setModalLoadingVisible(false)
+        });
+      }
+
+      useFocusEffect(
+        useCallback(() => {
+          getCursos();
+        }, [])
+      )
+
+      
+  function carregarNome(nome) {
+    if (nome != null && nome != undefined) {
+        if (nome.length > 16) {
+            return nome.substr(0, 15) + "...";
+        }
+        return nome
+    }
+    return "";
+}
+
+useEffect(() => {
+    loadLocalhost()
+  }, [])
+
+  
+  const buscar = async (cursoId) => {
+    router.push({pathname: `userScire/gerenciarAlunos/${cursoId}`, params: cursoId})
+  }
+
     return (
         <View onLayout={onLayoutRootView} style={styles.container}>
             <Text style={styles.title}>Meus Curso</Text>
@@ -61,22 +137,21 @@ export default function CursosCriados() {
                 </View>
                 <TextInput placeholder='O que você proucura ?' style={styles.formInput} onChangeText={handleInputChange} value={textInputValue} />
             </View>
-            <ScrollView >
+            <ScrollView style={{height: '100%', width:'100%'}}>
                 <View style={styles.scroll}>
-                    <Link href={"userScire/gerenciarAlunos"}>
-                        <View style={[styles.cards, styles.elavation]}>
-                            <Image style={styles.imgblank} source={require("../../assets/blankImage.png")} />
+                    {cursos?.map((curso, i) => (
+                    <Pressable  style={[styles.cards, styles.elavation]} key={i} onPress={() => buscar(curso.id)}>
+                            <Image style={styles.imgblank} source={{ uri: `http://${imageUrl}:8080/scireclass/imagem/downloadImage?path=${curso.pathThumbnail}` }} />
                             <View style={styles.nometempo}>
-                                <Text style={styles.textcard}>Nome do Curso</Text>
-                                <Text style={styles.tempo}>0 horas</Text>
+                                <Text style={styles.textcard}>{carregarNome(curso.nome)}</Text>
+                                <Text style={styles.tempo}>{curso.minutosTotalCurso} min</Text>
                             </View>
                             <View style={styles.alunos}>
                                 <Image style={styles.people} source={require("../../assets/people.png")} />
-                                <Text style={styles.textcard}>6/24</Text>
+                                <Text style={styles.textcard}>{curso.numeroDeMatricuals}/{curso.vagas}</Text>
                             </View>
-                        </View>
-                    </Link>
-
+                    </Pressable>
+                    ))}
                 </View>
             </ScrollView>
         </View>
@@ -84,7 +159,7 @@ export default function CursosCriados() {
 }
 const styles = StyleSheet.create({
     nometempo: {
-
+        width:"50%",
         padding: 10,
     },
     tempo: {
@@ -99,7 +174,8 @@ const styles = StyleSheet.create({
     },
     alunos: {
         flexDirection: 'row',
-
+        width:"30%",
+        justifyContent:"flex-end"
     },
     imgblank: {
         width: 70,
@@ -108,7 +184,9 @@ const styles = StyleSheet.create({
     scroll: {
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 10
+        padding: 10,
+        height: '100%',
+        width:'100%'
     },
 
 
@@ -135,8 +213,7 @@ const styles = StyleSheet.create({
     people: {
         width: 20,
         height: 23,
-        margin: 7,
-        marginLeft: 30
+
 
     },
     cards: {
@@ -146,10 +223,8 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 100,
         backgroundColor: "#FFF",
-        
-
-
         borderRadius: 10,
+        marginBottom: 16
     },
     elavation: {
         elevation: 20,

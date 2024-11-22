@@ -199,7 +199,6 @@ export default function cadastrarCurso() {
     });
     if (!doc.canceled) {
       let base64Image = await FileSystem.readAsStringAsync(doc.assets[0].uri, { encoding: 'base64' })
-      console.log(base64Image)
       setImage(base64Image)
     }
   }
